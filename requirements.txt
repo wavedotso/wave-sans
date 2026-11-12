@@ -19,3 +19,7 @@ ufo2ft==3.6.9
 ufoLib2==0.18.1
 unicodedata2==18.0.0
 zopfli==0.2.3.post1
+
+# Proof sheets for reviews (tools/proof.py)
+uharfbuzz==0.51.7
+skia-python==144.1
