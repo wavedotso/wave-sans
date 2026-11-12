@@ -1,0 +1,12 @@
+# Python environment (make venv)
+.venv/
+__pycache__/
+*.pyc
+
+# Build output and scratch work (make build, proofs, experiments)
+build/
+
+# Inter checkout and release, fetched separately for reference and verification
+upstream/
+
+.DS_Store
