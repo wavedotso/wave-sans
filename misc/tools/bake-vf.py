@@ -326,8 +326,11 @@ def gen_stat(ttfont):
   # build a version 1.1 STAT table with format 1 and 3 records:
   axes = stat_axes_format_3(font_is_italic(ttfont))
   if any(a.axisTag == "GRAD" for a in ttfont["fvar"].axes):
-    # Grade changes no style name: its one value is elidable.
-    axes.append(dict(name="Grade", tag="GRAD", values=[
+    # Grade changes no style name: its one value is elidable. It goes before
+    # 'ital', which must stay last so that names built from STAT end in
+    # "Italic", as in "Bold Italic".
+    italic = next(i for i, axis in enumerate(axes) if axis["tag"] == "ital")
+    axes.insert(italic, dict(name="Grade", tag="GRAD", values=[
       dict(name="Normal", value=0, flags=FLAG_DEFAULT),
     ]))
   buildStatTable(ttfont, axes)
