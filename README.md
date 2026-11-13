@@ -61,12 +61,22 @@ that do not split by character.
 make venv     # Python environment from requirements.txt
 make build    # build/fonts/var/WaveSans[GRAD,opsz,wght].ttf and build/fonts/web/
 make verify   # compare with the official Inter release glyph by glyph, and the web fonts with the build
+make qa       # FontBakery's checks, and confusable pairs measured against Inter
 ```
+
+`make qa` runs FontBakery's universal checks and fails on any difference,
+item by item, from the problems recorded in `tools/qa-known.json`;
+`tools/qa.py` gives the reason each one is accepted. It then measures how
+alike confusable pairs look at 11, 12, 13, 14 and 16 px on 1x and 2x screens,
+Wave Sans against Inter: I l 1, O 0 o, rn m, cl d and vv w, and I T, l t and
+l L, which the serifed I and tailed l bring a little closer. A score compares
+one pair across the two fonts, not one pair with another.
+`tools/legibility.py --image <file>` draws the pairs at 12 px, pixel by pixel.
 
 Review images: `tools/proof.py` sets the same lines side by side in several
 font setups (see its `--help`).
 
-`make verify` needs Inter's v4.1 release unpacked in
+`make verify` and `make qa` need Inter's v4.1 release unpacked in
 `upstream/inter-release/extracted/` (download `Inter-4.1.zip` from
 https://github.com/rsms/inter/releases/tag/v4.1).
 

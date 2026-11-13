@@ -5,7 +5,8 @@
 
 Wave Sans is Inter with the changes described below (the default I and l,
 the grade axis, and KNOWN), and this checks that nothing else differs. It
-checks that no family name or vendor ID is still Inter's, then the glyph set,
+checks that no family name or vendor ID is still Inter's and that the
+copyright and license records are in place, then the glyph set,
 code points, axes, named instances and OpenType features. At several
 design-space locations it then compares each character's advance width and
 outline with Inter's glyph for it, and shapes every pair of characters with
@@ -121,6 +122,16 @@ def default_swap(ref: TTFont) -> Tuple[Dict[int, int], Dict[int, int]]:
 # Inter's line, as the license requires.
 PRESENTED_NAME_IDS = {1, 3, 4, 6, 16, 17, 18, 21, 22, 25}
 
+# Every copy must carry the license (OFL condition 2): the copyright notice,
+# which keeps Inter's line and declares the Reserved Font Name, and the
+# license's description and address.
+LICENSE_NAMES = {
+    13: "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
+        "This license is available with a FAQ at: https://openfontlicense.org",
+    14: "https://openfontlicense.org",
+}
+COPYRIGHT_PARTS = ('with Reserved Font Name "Wave Sans"', "Copyright 2016 The Inter Project Authors")
+
 
 def names(font: TTFont) -> List[str]:
     ids = PRESENTED_NAME_IDS | {i.postscriptNameID for i in font["fvar"].instances}
@@ -128,6 +139,12 @@ def names(font: TTFont) -> List[str]:
                 for r in font["name"].names if r.nameID in ids and "Inter" in r.toUnicode()]
     if font["OS/2"].achVendID == "RSMS":
         problems.append("OS/2 vendor ID is still Inter's (RSMS)")
+    windows = {r.nameID: r.toUnicode() for r in font["name"].names if (r.platformID, r.langID) == (3, 0x409)}
+    for name_id, text in LICENSE_NAMES.items():
+        if windows.get(name_id) != text:
+            problems.append(f"name ID {name_id} is not the license's: {windows.get(name_id)!r}")
+    problems += [f"name ID 0 (copyright) lacks {part!r}" for part in COPYRIGHT_PARTS
+                 if part not in windows.get(0, "")]
     return problems
 
 

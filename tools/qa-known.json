@@ -1,0 +1,263 @@
+[
+ {
+  "check": "base_has_width",
+  "status": "FAIL",
+  "code": "zero-width-bases",
+  "text": "The following glyphs had zero advance width:",
+  "items": [
+   "uni0488 (U+0488)",
+   "uni0489 (U+0489)"
+  ]
+ },
+ {
+  "check": "case_mapping",
+  "status": "FAIL",
+  "code": "missing-case-counterparts",
+  "text": "The following glyphs lack their case-swapping counterparts:",
+  "items": [
+   "| :--- | :--- |",
+   "| Glyph present in the font | Missing case-swapping counterpart |",
+   "| U+01C6: LATIN SMALL LETTER DZ WITH CARON | U+01C4: LATIN CAPITAL LETTER DZ WITH CARON |",
+   "| U+023A: LATIN CAPITAL LETTER A WITH STROKE | U+2C65: LATIN SMALL LETTER A WITH STROKE |",
+   "| U+023E: LATIN CAPITAL LETTER T WITH DIAGONAL STROKE | U+2C66: LATIN SMALL LETTER T WITH DIAGONAL STROKE |",
+   "| U+0265: LATIN SMALL LETTER TURNED H | U+A78D: LATIN CAPITAL LETTER TURNED H |",
+   "| U+0266: LATIN SMALL LETTER H WITH HOOK | U+A7AA: LATIN CAPITAL LETTER H WITH HOOK |",
+   "| U+026A: LATIN LETTER SMALL CAPITAL I | U+A7AE: LATIN CAPITAL LETTER SMALL CAPITAL I |",
+   "| U+026C: LATIN SMALL LETTER L WITH BELT | U+A7AD: LATIN CAPITAL LETTER L WITH BELT |",
+   "| U+029D: LATIN SMALL LETTER J WITH CROSSED-TAIL | U+A7B2: LATIN CAPITAL LETTER J WITH CROSSED-TAIL |",
+   "| U+0376: GREEK CAPITAL LETTER PAMPHYLIAN DIGAMMA | U+0377: GREEK SMALL LETTER PAMPHYLIAN DIGAMMA |",
+   "| U+03FA: GREEK CAPITAL LETTER SAN | U+03FB: GREEK SMALL LETTER SAN |",
+   "| U+052F: CYRILLIC SMALL LETTER EL WITH DESCENDER | U+052E: CYRILLIC CAPITAL LETTER EL WITH DESCENDER |",
+   "| U+2132: TURNED CAPITAL F | U+214E: TURNED SMALL F |"
+  ]
+ },
+ {
+  "check": "family/win_ascent_and_descent",
+  "status": "FAIL",
+  "code": "ascent",
+  "text": "OS/2.usWinAscent value should be equal or greater than 2269, but got 1984 instead",
+  "items": []
+ },
+ {
+  "check": "family/win_ascent_and_descent",
+  "status": "FAIL",
+  "code": "descent",
+  "text": "OS/2.usWinDescent value should be equal or greater than 660, but got 494 instead",
+  "items": []
+ },
+ {
+  "check": "file_size",
+  "status": "WARN",
+  "code": "large-font",
+  "text": "Font file is 1.1Mb; ideally it should be less than 1.0Mb",
+  "items": []
+ },
+ {
+  "check": "interpolation_issues",
+  "status": "WARN",
+  "code": "interpolation-issues",
+  "text": "Interpolation issues were found in the font:",
+  "items": [
+   "Contour 0 point 10 in glyph 'uni02B8' has a kink between location opsz=14,wght=100,GRAD=0 and location opsz=14,wght=900,GRAD=0",
+   "Contour 0 point 10 in glyph 'uni02B8' has a kink between location opsz=14,wght=900,GRAD=0 and location opsz=32,wght=400,GRAD=-50",
+   "Contour 0 point 27 in glyph 'lambda' has a kink between location opsz=32,wght=400,GRAD=0 and location opsz=14,wght=100,GRAD=0",
+   "Contour 0 point 8 in glyph 'lambda' has a kink between location opsz=32,wght=400,GRAD=0 and location opsz=14,wght=100,GRAD=0",
+   "Contour 1 point 27 in glyph 'uni019B' has a kink between location opsz=32,wght=400,GRAD=0 and location opsz=14,wght=100,GRAD=0",
+   "Contour 1 point 8 in glyph 'uni019B' has a kink between location opsz=32,wght=400,GRAD=0 and location opsz=14,wght=100,GRAD=0"
+  ]
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 25",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 297",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 298",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 299",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 300",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 301",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 302",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 303",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 304",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 305",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 306",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 307",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 308",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 309",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 310",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 311",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 312",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 313",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 4",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 6",
+  "items": []
+ },
+ {
+  "check": "opentype/gdef_mark_chars",
+  "status": "WARN",
+  "code": "mark-chars",
+  "text": "The following mark characters could be in the GDEF mark glyph class: uni0488 (U+0488), uni0489 (U+0489), uni20DD (U+20DD) and uni20DE (U+20DE)",
+  "items": []
+ },
+ {
+  "check": "overlapping_path_segments",
+  "status": "WARN",
+  "code": "overlapping-path-segments",
+  "text": "The following glyphs have overlapping path segments:",
+  "items": [
+   "archdblsubcomb (U+EEAA): L<<-638.0,-114.0>--<-540.0,-114.0>> has the same coordinates as a previous segment.",
+   "rrthook (U+E05D): L<<338.0,0.0>--<158.0,0.0>> has the same coordinates as a previous segment.",
+   "seagullsubcomb (U+EEC5): L<<-497.0,-373.0>--<-601.0,-373.0>> has the same coordinates as a previous segment.",
+   "uni01AC (U+01AC): L<<464.0,1323.0>--<464.0,1490.0>> has the same coordinates as a previous segment.",
+   "uni024A (U+024A): L<<1206.0,0.0>--<1386.0,0.0>> has the same coordinates as a previous segment.",
+   "uni025E (U+025E): L<<283.0,575.0>--<104.0,575.0>> has the same coordinates as a previous segment.",
+   "uni0264 (U+0264): L<<740.0,150.0>--<740.0,-20.0>> has the same coordinates as a previous segment.",
+   "uni0267 (U+0267): L<<1052.0,0.0>--<872.0,0.0>> has the same coordinates as a previous segment.",
+   "uni026D (U+026D): L<<338.0,0.0>--<158.0,0.0>> has the same coordinates as a previous segment.",
+   "uni0271 (U+0271): L<<1636.0,0.0>--<1456.0,0.0>> has the same coordinates as a previous segment.",
+   "uni0272 (U+0272): L<<338.0,0.0>--<158.0,0.0>> has the same coordinates as a previous segment.",
+   "uni0277 (U+0277): L<<837.0,966.0>--<837.0,1132.0>> has the same coordinates as a previous segment.",
+   "uni028B (U+028B): L<<557.0,-20.0>--<557.0,152.0>> has the same coordinates as a previous segment.",
+   "uni029A (U+029A): L<<1054.0,575.0>--<875.0,575.0>> has the same coordinates as a previous segment.",
+   "uni04C8 (U+04C8): L<<1047.0,0.0>--<867.0,0.0>> has the same coordinates as a previous segment.",
+   "uni203D (U+203D): L<<542.0,418.0>--<414.0,418.0>> has the same coordinates as a previous segment.",
+   "uni2E18 (U+2E18): L<<496.0,700.0>--<624.0,700.0>> has the same coordinates as a previous segment."
+  ]
+ },
+ {
+  "check": "smart_dropout",
+  "status": "FAIL",
+  "code": "lacks-smart-dropout",
+  "text": "The 'prep' table does not contain TrueType instructions enabling smart dropout control. To fix, export the font with autohinting enabled, or run ttfautohint on the font, or run the `gftools fix-nonhinting` script.",
+  "items": []
+ },
+ {
+  "check": "unreachable_glyphs",
+  "status": "WARN",
+  "code": "unreachable-glyphs",
+  "text": "The following glyphs could not be reached by codepoint or substitution rules:",
+  "items": [
+   "_part.t_base",
+   "_part.tcurl_base",
+   "koronisaccentleft.cn",
+   "macrondieresiscomb.cn",
+   "tildemacroncomb.cn",
+   "uni1DC4.cn",
+   "uni1DC6.cn"
+  ]
+ }
+]

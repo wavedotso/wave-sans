@@ -23,5 +23,39 @@ zopfli==0.2.3.post1
 # Shaping, for the spacing check in make verify and for the proof sheets
 uharfbuzz==0.51.7
 
-# Proof sheets for reviews (tools/proof.py)
+# Proof sheets for reviews (tools/proof.py) and the confusable-pairs benchmark
+# (tools/legibility.py)
+numpy==2.0.2
+pybind11==3.1.0
 skia-python==144.1
+
+# Quality checks (make qa): FontBakery and what it needs
+beziers==0.6.0
+certifi==2026.10.23
+cffi==2.0.0
+charset-normalizer==3.5.2
+cmarkgfm==2025.10.22
+commandlines==0.4.1
+dehinter==4.0.0
+fontbakery==1.1.0
+freetype-py==2.3.0
+idna==3.20
+Jinja2==3.1.6
+markdown-it-py==3.0.0
+MarkupSafe==3.0.4
+mdurl==0.1.2
+munkres==1.1.4
+opentype-sanitizer==9.2.0
+opentypespec==1.9.2
+packaging==26.3
+pip_api==0.0.35
+pycparser==2.23
+Pygments==2.21.0
+PyYAML==6.0.3
+requests==2.32.5
+rich==15.0.0
+toml==0.10.2
+typing_extensions==4.16.0
+ufolint==1.2.0
+urllib3==2.6.3
+vharfbuzz==0.3.1
