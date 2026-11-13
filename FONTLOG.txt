@@ -23,6 +23,10 @@ Changelog
 Most recent first.
 
 Wave Sans 1.000, in development
+- 2026-11-13: the accented serifed I forms and ļ kern like their base
+  letters; Inter left these alternates without kerning of their own. ĺ, ḷ,
+  ľ, ŀ and the other l forms keep Inter's kerning, since their accents would
+  touch some neighbors.
 - 2026-11-13: the serifed I and the tailed l are the defaults, with every
   accented form, the Cyrillic I and Yi, and the Greek capital iota. Stylistic
   set ss09 "Plain I and l" gives back Inter's plain forms. Inter's cv05 and

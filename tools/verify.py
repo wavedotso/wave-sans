@@ -59,6 +59,21 @@ KNOWN.update({("attach", cp): "private-use mark attached by ufo2ft" for cp in PR
 # plain Greek iotas, defaults in Inter.
 GREEK_IOTAS = {0x0399: 0x0406, 0x038A: 0x1FDB, 0x03AA: 0x00CF}
 
+# Inter gave its accented serifed I and tailed l alternates no kerning of
+# their own. Ours kern like their base letter wherever that adds no overlap
+# the base letter does not already have, measured at the six locations: every
+# serifed I form, and ļ (with its ss03 and ss07 forms). Greek iotas with an
+# accent left of the stem do so on their right side only, as Inter's plain
+# ones do. ĺ, ḷ, ľ, ŀ and the other l forms keep Inter's kerning: their
+# accents would touch some neighbors. kerning() checks these pair by pair;
+# spacing() leaves their kerning to it.
+# Escaped: Unicode normalization would turn U+1FDB (with oxia) into U+038A.
+LEFT_ACCENTED_IOTAS = "ἸἹἺἻἼἽἾἿῚΊΊ"
+KERNS_LIKE = {**{c: "I" for c in "ÍÌÎÏĨĪĬĮİǏȈȊỈỊƗḬḮІЇΙΪῘῙ" + LEFT_ACCENTED_IOTAS}, "ļ": "l"}
+# Next to accented i, Ї keeps the kerning Inter gave its serifed alternate,
+# in the masters where Inter gave it some; elsewhere it kerns like I.
+KEEPS_INTER_KERNING = {"Ї": "ïĩīĭȋїḯ"}
+
 
 def single_subs(font: TTFont, tag: str) -> Dict[str, str]:
     """A font's single substitutions under one feature."""
@@ -172,34 +187,100 @@ def shape(font: hb.Font, keys: List[int], text: str, feats: Dict[str, bool]) -> 
             for i, p in zip(buf.glyph_infos, buf.glyph_positions)]
 
 
-Run = Tuple[str, Dict[str, bool], Dict[str, bool], str, Dict[int, int]]
+Run = Tuple[str, Dict[str, bool], Dict[str, bool], str, Dict[int, int], str]
+
+
+def standard_chars(ref: TTFont) -> str:
+    return "".join(c for c in spaced_chars(ref.getBestCmap()) if unicodedata.category(c) != "Co")
 
 
 def spacing_runs(ref: TTFont) -> List[Run]:
     """How Inter shows what Wave Sans shows: (label, our features, Inter's
-    features, characters, Inter's stand-in characters). Inter reaches its
-    alternates through features that run after its contextual forms, so it
-    sets the same case-sensitive punctuation around them as we do around our
-    defaults."""
+    features, characters, Inter's stand-in characters, which of our default
+    I and l forms are on: "round" dots, "square" dots or none). Inter reaches
+    its alternates through features that run after its contextual forms, so
+    it sets the same case-sensitive punctuation around them as we do around
+    our defaults."""
     defaults, alternates = default_swap(ref)
     chars = spaced_chars(ref.getBestCmap())
-    standard = "".join(c for c in chars if unicodedata.category(c) != "Co")
+    standard = standard_chars(ref)
     return [
         # Our default I and l are Inter's cv05 and cv08 forms.
-        ("default", {}, {"cv05": True, "cv08": True}, standard, GREEK_IOTAS),
+        ("default", {}, {"cv05": True, "cv08": True}, standard, GREEK_IOTAS, "round"),
         # ss09 gives back Inter's own defaults.
-        ("ss09", {"ss09": True}, {}, standard, {}),
+        ("ss09", {"ss09": True}, {}, standard, {}, ""),
         # Square dots on our I and l are Inter's ss04 and ss07 forms. The
         # German sharp s, which ss04 also changes, and the Greek iotas, which
         # have no ss07 forms, are left out.
         ("ss07", {"ss07": True}, {"ss04": True, "ss07": True},
-         "".join(c for c in standard if c != "ß" and ord(c) not in GREEK_IOTAS), {}),
+         "".join(c for c in standard if c != "ß" and ord(c) not in GREEK_IOTAS), {}, "square"),
         # Everything the swap leaves alone, private-use alternates included.
         # Private-use I and l alternates are compared glyph by glyph only:
         # Inter's contextual forms treat its own as letters, ours as symbols.
         ("unchanged", {}, {}, "".join(c for c in chars if ord(c) not in defaults
-                                       and ord(c) not in alternates), {}),
+                                       and ord(c) not in alternates), {}, ""),
     ]
+
+
+def kerned_like_base(text: str, at: int) -> bool:
+    """Whether the kerning a glyph carries (with the character after it) is
+    a KERNS_LIKE form's, which kerning() checks instead."""
+    after = text[at + 1] if at + 1 < len(text) else ""
+    return text[at] in KERNS_LIKE or (after in KERNS_LIKE and after not in LEFT_ACCENTED_IOTAS)
+
+
+def first_kerns(font: hb.Font, text: str, feats: Dict[str, bool]) -> List[Tuple[int, int, int]]:
+    """(cluster, glyph ID, kerning with the next glyph) per glyph."""
+    buf = hb.Buffer()
+    buf.add_codepoints([ord(c) for c in text])
+    buf.guess_segment_properties()
+    hb.shape(font, buf, feats)
+    return [(i.cluster, i.codepoint, p.x_advance - font.get_glyph_h_advance(i.codepoint))
+            for i, p in zip(buf.glyph_infos, buf.glyph_positions)]
+
+
+def kerning(job: Tuple[str, str, Dict[str, float], str]) -> List[str]:
+    """Each KERNS_LIKE form against its base letter at one location: with
+    every partner, before and after it, the same kerning and the same partner
+    glyph, with and without ss03 and ss07 (KEEPS_INTER_KERNING pairs may
+    instead match Inter's own alternate)."""
+    ours_path, ref_path, loc, partners = job
+    fonts = []
+    for path in (ours_path, ref_path):
+        font = hb.Font(hb.Face(hb.Blob.from_file_path(path)))
+        font.set_variations(loc)
+        fonts.append(font)
+    ours, ref = fonts
+
+    def inter_kerns(pair: str, feats: Dict[str, bool]) -> int:
+        return first_kerns(ref, pair, {**feats, "cv05": True, "cv08": True})[0][2]
+
+    pairs: Dict[str, str] = {}
+    for feats in ({}, {"ss03": True}, {"ss07": True}):
+        tag = ",".join(feats) or "default"
+        for x, base in KERNS_LIKE.items():
+            text = "".join(x + p for p in partners)
+            a = first_kerns(ours, text, feats)
+            b = first_kerns(ours, "".join(base + p for p in partners), feats)
+            if [g[0] for g in a] != [g[0] for g in b]:
+                pairs[f"{x} {tag}"] = "different glyph sequences"
+                continue
+            for (at, glyph_a, kern_a), (_, glyph_b, kern_b) in zip(a, b):
+                pair = text[at:at + 2]
+                if at % 2 and glyph_a != glyph_b:
+                    pairs.setdefault(f"{pair} {tag}", "partner glyph differs")
+                if kern_a == kern_b or (at % 2 and x in LEFT_ACCENTED_IOTAS) or len(pair) < 2:
+                    continue
+                partner = pair[1] if at % 2 == 0 else pair[0]
+                if partner in KEEPS_INTER_KERNING.get(x, "") and kern_a == inter_kerns(pair, feats):
+                    continue
+                like = base + pair[1] if at % 2 == 0 else pair[0] + base
+                pairs.setdefault(f"{pair} {tag}", f"kerns {kern_a}, {like} {kern_b}")
+    label = f"{loc} kerning like the base letter"
+    shown = [f"{label}: {pair!r} {why}" for pair, why in sorted(pairs.items())[:12]]
+    if len(pairs) > len(shown):
+        shown.append(f"{label}: {len(pairs) - len(shown)} more pairs differ")
+    return shown
 
 
 def spacing(job: Tuple[str, str, Dict[str, float], Run]) -> List[str]:
@@ -211,7 +292,7 @@ def spacing(job: Tuple[str, str, Dict[str, float], Run]) -> List[str]:
     reported as the pair its character starts; an offset difference (a mark
     placed on the glyph before it) as the pair it ends.
     """
-    ours_path, ref_path, loc, (name, ours_feats, ref_feats, chars, stand_ins) = job
+    ours_path, ref_path, loc, (name, ours_feats, ref_feats, chars, stand_ins, dots) = job
     fonts = []
     for path in (ours_path, ref_path):
         font = hb.Font(hb.Face(hb.Blob.from_file_path(path)))
@@ -231,6 +312,8 @@ def spacing(job: Tuple[str, str, Dict[str, float], Run]) -> List[str]:
             if ga == gb:
                 continue
             at = ga[0]
+            if dots and ga[:2] == gb[:2] and ga[3:] == gb[3:] and kerned_like_base(text, at):
+                continue  # only the kerning of a KERNS_LIKE form differs: kerning() checks it
             if ga[:3] == gb[:3]:  # same shape and advance: only its offsets differ
                 if ("attach", ord(text[at])) in KNOWN:
                     continue
@@ -270,11 +353,12 @@ def compare(ours_path: str, ref_path: str) -> List[str]:
 
     defaults, alternates = default_swap(ref)
     swap = {**defaults, **alternates}
-    runs = spacing_runs(ref)
+    runs, partners = spacing_runs(ref), standard_chars(ref)
     with ProcessPoolExecutor() as pool:
         # Spacing runs in other processes while the outlines are compared here.
         spaced = [pool.submit(spacing, (ours_path, ref_path, loc, run))
                   for loc in LOCATIONS for run in runs]
+        spaced += [pool.submit(kerning, (ours_path, ref_path, loc, partners)) for loc in LOCATIONS]
         for loc in LOCATIONS:
             a = instantiateVariableFont(TTFont(ours_path), loc)
             b = instantiateVariableFont(TTFont(ref_path), loc)
@@ -310,6 +394,7 @@ def main(argv: List[str] | None = None) -> int:
     defaults, alternates = default_swap(TTFont(args.inter))
     print(f"known: {len(defaults)} code points show Inter's serifed I and tailed l, "
           f"{len(alternates)} private-use ones its plain forms")
+    print(f"known: {len(KERNS_LIKE)} accented I and l forms kern like their base letter, checked pair by pair")
     for (kind, key), why in KNOWN.items():
         print(f"known: {kind} {f'U+{key:04X}' if isinstance(key, int) else key} ({why})")
     print("identical to Inter except known differences" if not problems else f"{len(problems)} unexplained differences")
