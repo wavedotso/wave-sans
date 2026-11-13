@@ -402,7 +402,7 @@ nodes = (
 width = 1248;
 }
 );
-metricLeft = l;
+metricLeft = l.ss09;
 metricRight = o;
 unicode = 254;
 userData = {

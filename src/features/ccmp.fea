@@ -165,7 +165,7 @@ lookup ccmp03 {
   sub l dotaccentcomb by ldot;
   sub L slashlongcomb by Lslash;
   sub l slashlongcomb by lslash;
-  sub l.ss02 slashlongcomb by lslash.ss02;
+  sub l.ss09 slashlongcomb by lslash.ss09;
   sub N acutecomb by Nacute;
   sub n acutecomb by nacute;
   sub N commaaccent by Ncommaaccent;

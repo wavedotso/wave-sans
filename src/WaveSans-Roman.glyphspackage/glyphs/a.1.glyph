@@ -502,7 +502,7 @@ width = 1282;
 }
 );
 metricLeft = o;
-metricRight = l;
+metricRight = l.ss09;
 note = "Based on d";
 unicode = 57388;
 }

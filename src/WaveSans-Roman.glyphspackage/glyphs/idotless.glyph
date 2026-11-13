@@ -209,8 +209,8 @@ nodes = (
 width = 314;
 }
 );
-metricLeft = l;
-metricRight = l;
+metricLeft = l.ss09;
+metricRight = l.ss09;
 unicode = 305;
 userData = {
 "interface.width-adjustments" = (

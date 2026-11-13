@@ -674,7 +674,7 @@ width = 1274;
 }
 );
 metricLeft = v;
-metricRight = l.ss02;
+metricRight = l;
 note = "Built from a flipped /y with the tail copied to the lower right";
 unicode = 955;
 userData = {

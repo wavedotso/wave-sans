@@ -58,9 +58,9 @@ sub f' @DLIG_i_R by f.i;
   l lslash lbar lmidtilde lrthook lbelt lcurl ldot lacute
   lcommaaccent lcaron
   ldotbelow ldotbelowmacron llinebelow lcircumflexbelow
-  l.ss02 lslash.ss02 lbar.ss02 lmidtilde.ss02 lbelt.ss02 ldot.ss02 lacute.ss02
-  lcommaaccent.ss02 lcaron.ss02
-  ldotbelow.ss02 ldotbelowmacron.ss02 llinebelow.ss02 lcircumflexbelow.ss02
+  l.ss09 lslash.ss09 lbar.ss09 lmidtilde.ss09 lbelt.ss09 ldot.ss09 lacute.ss09
+  lcommaaccent.ss09 lcaron.ss09
+  ldotbelow.ss09 ldotbelowmacron.ss09 llinebelow.ss09 lcircumflexbelow.ss09
 
 ];
 

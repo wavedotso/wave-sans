@@ -155,7 +155,7 @@ nodes = (
 width = 442;
 }
 );
-metricLeft = l;
+metricLeft = l.ss09;
 metricRight = t;
 unicode = 60934;
 }

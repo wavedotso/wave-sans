@@ -1,0 +1,71 @@
+featureNames { name "Plain I and l"; };
+
+# Inter's plain I and l. Wave Sans sets their serifed and tailed forms by
+# default. Every variant is listed, so ss03 and ss07 combine with this set
+# whichever runs first.
+
+# l
+sub l                    by l.ss09;
+sub lslash               by lslash.ss09;
+sub lbar                 by lbar.ss09;
+sub lmidtilde            by lmidtilde.ss09;
+sub lbelt                by lbelt.ss09;
+sub ldot                 by ldot.ss09;
+sub lacute               by lacute.ss09;
+sub lcommaaccent         by lcommaaccent.ss09;
+sub lcaron               by lcaron.ss09;
+sub ldotbelow            by ldotbelow.ss09;
+sub ldotbelowmacron      by ldotbelowmacron.ss09;
+sub llinebelow           by llinebelow.ss09;
+sub lcircumflexbelow     by lcircumflexbelow.ss09;
+sub ldot.ss07            by ldot.ss09.ss07;
+sub lcommaaccent.ss03    by lcommaaccent.ss09.ss03;
+sub lcommaaccent.ss07    by lcommaaccent.ss09.ss07;
+sub ldotbelow.ss07       by ldotbelow.ss09.ss07;
+sub ldotbelowmacron.ss07 by ldotbelowmacron.ss09.ss07;
+
+# I
+sub I                    by I.ss09;
+sub Idieresis            by Idieresis.ss09;
+sub Idieresisacute       by Idieresisacute.ss09;
+sub Istroke              by Istroke.ss09;
+sub Itildebelow          by Itildebelow.ss09;
+sub Igrave               by Igrave.ss09;
+sub Iacute               by Iacute.ss09;
+sub Icircumflex          by Icircumflex.ss09;
+sub Itilde               by Itilde.ss09;
+sub Imacron              by Imacron.ss09;
+sub Ibreve               by Ibreve.ss09;
+sub Iogonek              by Iogonek.ss09;
+sub Idotaccent           by Idotaccent.ss09;
+sub Icaron               by Icaron.ss09;
+sub Idblgrave            by Idblgrave.ss09;
+sub Iinvertedbreve       by Iinvertedbreve.ss09;
+sub Ihookabove           by Ihookabove.ss09;
+sub Idotbelow            by Idotbelow.ss09;
+sub Idieresis.ss07       by Idieresis.ss09.ss07;
+sub Idieresisacute.ss07  by Idieresisacute.ss09.ss07;
+sub Idotaccent.ss07      by Idotaccent.ss09.ss07;
+sub Idotbelow.ss07       by Idotbelow.ss09.ss07;
+
+# Greek capital iota
+sub uni1F38              by uni1F38.ss09;
+sub uni1F39              by uni1F39.ss09;
+sub uni1F3A              by uni1F3A.ss09;
+sub uni1F3B              by uni1F3B.ss09;
+sub uni1F3C              by uni1F3C.ss09;
+sub uni1F3D              by uni1F3D.ss09;
+sub uni1F3E              by uni1F3E.ss09;
+sub uni1F3F              by uni1F3F.ss09;
+sub uni1FD8              by uni1FD8.ss09;
+sub uni1FD9              by uni1FD9.ss09;
+sub uni1FDA              by uni1FDA.ss09;
+sub uni1FDB              by uni1FDB.ss09;
+sub IotaGreek            by IotaGreek.ss09;
+sub Iotatonos            by Iotatonos.ss09;
+sub Iotadieresis         by Iotadieresis.ss09;
+
+# Cyrillic I and Yi
+sub afii10055            by afii10055.ss09;
+sub Yi-cy                by Yi-cy.ss09;
+sub Yi-cy.ss07           by Yi-cy.ss09.ss07;

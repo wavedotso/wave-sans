@@ -1,85 +1,89 @@
 {
 glyphname = Idotaccent;
-kernLeft = B;
-kernRight = H;
 layers = (
 {
 layerId = "C698F293-3EC0-4A5A-A3A0-0FDB1F5CF265";
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (28,372);
+pos = (205,372);
 ref = dotaccentcomb;
 }
 );
-width = 550;
+width = 903;
 },
 {
 layerId = "5C20EF92-B63D-42A8-8878-93C2863E0093";
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (-34,372);
+pos = (185,372);
 ref = dotaccentcomb;
 }
 );
-width = 596;
+width = 1038;
 },
 {
 layerId = "B1F27B51-9973-4381-9301-4FE46FE1CA59";
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (69,372);
+pos = (198,372);
 ref = dotaccentcomb;
 }
 );
-width = 510;
+width = 768;
 },
 {
 layerId = m007;
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (26,434);
+pos = (135,434);
 ref = dotaccentcomb;
 }
 );
-width = 476;
+width = 694;
 },
 {
 layerId = m009;
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (-32,434);
+pos = (127,434);
 ref = dotaccentcomb;
 }
 );
-width = 576;
+width = 894;
 },
 {
 layerId = m011;
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (69,434);
+pos = (132,434);
 ref = dotaccentcomb;
 }
 );
-width = 382;
+width = 508;
 }
 );
 unicode = 304;

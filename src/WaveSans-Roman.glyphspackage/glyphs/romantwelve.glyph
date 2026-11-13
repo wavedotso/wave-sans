@@ -11,11 +11,11 @@ ref = X;
 },
 {
 pos = (1397,0);
-ref = I;
+ref = I.ss09;
 },
 {
 pos = (1947,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2497;
@@ -28,11 +28,11 @@ ref = X;
 },
 {
 pos = (1610,0);
-ref = I;
+ref = I.ss09;
 },
 {
 pos = (2206,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2802;
@@ -45,11 +45,11 @@ ref = X;
 },
 {
 pos = (1270,0);
-ref = I;
+ref = I.ss09;
 },
 {
 pos = (1780,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2290;
@@ -62,11 +62,11 @@ ref = X;
 },
 {
 pos = (1322,0);
-ref = I;
+ref = I.ss09;
 },
 {
 pos = (1798,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2274;
@@ -79,11 +79,11 @@ ref = X;
 },
 {
 pos = (1518,0);
-ref = I;
+ref = I.ss09;
 },
 {
 pos = (2094,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2670;
@@ -96,11 +96,11 @@ ref = X;
 },
 {
 pos = (1188,0);
-ref = I;
+ref = I.ss09;
 },
 {
 pos = (1570,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 1952;

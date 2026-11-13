@@ -473,7 +473,7 @@ pos = (514,0);
 }
 );
 layerId = "03B6965B-C8CA-490E-BADC-F36FF057E9FA";
-metricRight = "=l";
+metricRight = "=l.ss09";
 name = "May 25, 22, 10:30";
 shapes = (
 {

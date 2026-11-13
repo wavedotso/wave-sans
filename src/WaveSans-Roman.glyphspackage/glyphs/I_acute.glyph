@@ -1,85 +1,89 @@
 {
 glyphname = Iacute;
-kernLeft = B;
-kernRight = H;
 layers = (
 {
 layerId = "C698F293-3EC0-4A5A-A3A0-0FDB1F5CF265";
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (28,372);
+pos = (205,372);
 ref = acutecomb;
 }
 );
-width = 550;
+width = 903;
 },
 {
 layerId = "5C20EF92-B63D-42A8-8878-93C2863E0093";
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (-4,372);
+pos = (215,372);
 ref = acutecomb;
 }
 );
-width = 596;
+width = 1038;
 },
 {
 layerId = "B1F27B51-9973-4381-9301-4FE46FE1CA59";
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (43,372);
+pos = (172,372);
 ref = acutecomb;
 }
 );
-width = 510;
+width = 768;
 },
 {
 layerId = m007;
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (74,434);
+pos = (183,434);
 ref = acutecomb;
 }
 );
-width = 476;
+width = 694;
 },
 {
 layerId = m009;
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (70,434);
+pos = (229,434);
 ref = acutecomb;
 }
 );
-width = 576;
+width = 894;
 },
 {
 layerId = m011;
 shapes = (
 {
+alignment = 1;
 ref = I;
 },
 {
-pos = (61,434);
+pos = (124,434);
 ref = acutecomb;
 }
 );
-width = 382;
+width = 508;
 }
 );
 unicode = 205;

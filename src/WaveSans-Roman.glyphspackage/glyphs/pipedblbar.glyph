@@ -154,8 +154,8 @@ ref = crossbar;
 width = 314;
 }
 );
-metricLeft = lbar;
-metricRight = lbar;
+metricLeft = lbar.ss09;
+metricRight = lbar.ss09;
 unicode = 450;
 userData = {
 interface.gridadjust.original = "{'width': 938, 'leftMargin': 27, 'rightMargin': 28}";

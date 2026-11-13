@@ -23,6 +23,11 @@ Changelog
 Most recent first.
 
 Wave Sans 1.000, in development
+- 2026-11-13: the serifed I and the tailed l are the defaults, with every
+  accented form, the Cyrillic I and Yi, and the Greek capital iota. Stylistic
+  set ss09 "Plain I and l" gives back Inter's plain forms. Inter's cv05 and
+  cv08 are removed, since their forms are now the defaults; ss02 and ss04
+  keep their alternate sharp s and slashed zero.
 - 2026-11-13: renamed from Inter to Wave Sans: family, file and PostScript
   names, font credits and vendor ID (WAVE). Letters, spacing and OpenType
   features are Inter 4.1's, unchanged.

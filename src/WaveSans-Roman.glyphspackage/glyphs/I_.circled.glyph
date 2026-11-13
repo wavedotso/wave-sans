@@ -11,7 +11,7 @@ ref = largeCircle;
 {
 alignment = -1;
 pos = (1168,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2846;
@@ -26,7 +26,7 @@ ref = largeCircle;
 {
 alignment = -1;
 pos = (1232,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2846;
@@ -41,7 +41,7 @@ ref = largeCircle;
 {
 alignment = -1;
 pos = (1148,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2846;
@@ -56,7 +56,7 @@ ref = largeCircle;
 {
 alignment = -1;
 pos = (1185,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2846;
@@ -71,7 +71,7 @@ ref = largeCircle;
 {
 alignment = -1;
 pos = (1125,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2846;
@@ -86,7 +86,7 @@ ref = largeCircle;
 {
 alignment = -1;
 pos = (1135,0);
-ref = I;
+ref = I.ss09;
 }
 );
 width = 2846;

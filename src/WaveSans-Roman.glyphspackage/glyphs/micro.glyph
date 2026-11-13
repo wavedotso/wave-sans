@@ -880,7 +880,7 @@ nodes = (
 width = 1182;
 }
 );
-metricLeft = l;
+metricLeft = l.ss09;
 note = "flipped /h + right side of /u";
 unicode = 181;
 userData = {

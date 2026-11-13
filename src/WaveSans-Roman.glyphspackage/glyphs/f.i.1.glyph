@@ -864,7 +864,7 @@ nodes = (
 width = 748;
 }
 );
-metricLeft = l;
+metricLeft = l.ss09;
 note = "!flatten";
 unicode = 60943;
 userData = {
