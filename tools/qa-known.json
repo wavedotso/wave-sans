@@ -77,13 +77,6 @@
   "check": "no_mac_entries",
   "status": "FAIL",
   "code": "mac-names",
-  "text": "Please remove name ID 297",
-  "items": []
- },
- {
-  "check": "no_mac_entries",
-  "status": "FAIL",
-  "code": "mac-names",
   "text": "Please remove name ID 298",
   "items": []
  },
@@ -190,6 +183,13 @@
   "status": "FAIL",
   "code": "mac-names",
   "text": "Please remove name ID 313",
+  "items": []
+ },
+ {
+  "check": "no_mac_entries",
+  "status": "FAIL",
+  "code": "mac-names",
+  "text": "Please remove name ID 314",
   "items": []
  },
  {

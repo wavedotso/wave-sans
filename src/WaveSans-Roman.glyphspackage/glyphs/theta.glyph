@@ -278,7 +278,7 @@ associatedMasterId = m007;
 background = {
 shapes = (
 {
-ref = zero;
+ref = zero.ss10;
 }
 );
 };
@@ -326,7 +326,7 @@ associatedMasterId = m007;
 background = {
 shapes = (
 {
-ref = zero;
+ref = zero.ss10;
 }
 );
 };
@@ -388,7 +388,7 @@ background = {
 shapes = (
 {
 pos = (2,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 };
@@ -450,7 +450,7 @@ associatedMasterId = m007;
 background = {
 shapes = (
 {
-ref = zero;
+ref = zero.ss10;
 }
 );
 };

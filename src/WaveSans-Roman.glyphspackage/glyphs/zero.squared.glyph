@@ -11,7 +11,7 @@ ref = whiteLargeSquare;
 {
 alignment = -1;
 pos = (809,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 width = 2828;
@@ -26,7 +26,7 @@ ref = whiteLargeSquare;
 {
 alignment = -1;
 pos = (845,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 width = 2828;
@@ -41,7 +41,7 @@ ref = whiteLargeSquare;
 {
 alignment = -1;
 pos = (768,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 width = 2828;
@@ -56,7 +56,7 @@ ref = whiteLargeSquare;
 {
 alignment = -1;
 pos = (786,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 width = 2828;
@@ -71,7 +71,7 @@ ref = whiteLargeSquare;
 {
 alignment = -1;
 pos = (686,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 width = 2828;
@@ -86,7 +86,7 @@ ref = whiteLargeSquare;
 {
 alignment = -1;
 pos = (716,0);
-ref = zero;
+ref = zero.ss10;
 }
 );
 width = 2828;

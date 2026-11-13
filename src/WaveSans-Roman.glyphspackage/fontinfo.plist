@@ -1435,6 +1435,7 @@ franc,
 baht,
 bitcoin,
 zero,
+zero.ss10,
 one,
 two,
 twostroke,
@@ -1453,6 +1454,7 @@ four.ss01,
 six.ss01,
 nine.ss01,
 zero.tf,
+zero.tf.ss10,
 one.tf,
 two.tf,
 three.tf,
@@ -3424,6 +3426,11 @@ tag = ss08;
 code = "include(features/ss09-plain-i-l.fea);
 ";
 tag = ss09;
+},
+{
+code = "include(features/ss10-plain-zero.fea);
+";
+tag = ss10;
 },
 {
 code = "cvParameters { FeatUILabelNameID { name \"Alternate one\"; }; };

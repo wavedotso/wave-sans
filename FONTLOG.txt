@@ -24,6 +24,10 @@ Changelog
 Most recent first.
 
 Wave Sans 1.000, in development
+- 2026-11-13: the zero is dotted by default, so that 0 and O never look alike
+  in a username: Inter's zero with a dot centered in its counter, in every
+  weight, for the default and tabular zeros. Stylistic set ss10 "Plain zero"
+  gives back Inter's plain zero; the slashed zero stays on the zero feature.
 - 2026-11-13: in the STAT table the grade axis now comes before italic, so
   style names built from it end in "Italic", as in "Bold Italic".
 - 2026-11-13: web fonts. WOFF2 files split by character set, with a

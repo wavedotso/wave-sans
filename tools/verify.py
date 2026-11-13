@@ -4,7 +4,8 @@
         upstream/inter-release/extracted/InterVariable.ttf
 
 Wave Sans is Inter with the changes described below (the default I and l,
-the grade axis, and KNOWN), and this checks that nothing else differs. It
+the dotted zero, the grade axis, and KNOWN), and this checks that nothing
+else differs. It
 checks that no family name or vendor ID is still Inter's and that the
 copyright and license records are in place, then the glyph set,
 code points, axes, named instances and OpenType features. At several
@@ -27,6 +28,7 @@ import pathops
 import uharfbuzz as hb
 import unicodedata2 as unicodedata
 from fontTools.pens.areaPen import AreaPen
+from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.perimeterPen import PerimeterPen
 from fontTools.pens.recordingPen import DecomposingRecordingPen
 from fontTools.ttLib import TTFont
@@ -49,6 +51,7 @@ KNOWN = {
     ("feature", "cv05"): "removed: its tailed l is the default",
     ("feature", "cv08"): "removed: its serifed I is the default",
     ("feature", "ss09"): "added: Inter's plain I and l",
+    ("feature", "ss10"): "added: Inter's plain zero",
     ("axis", "GRAD"): "added: grade, stroke weight without any width change",
 }
 
@@ -70,6 +73,16 @@ KNOWN.update({("attach", cp): "private-use mark attached by ufo2ft" for cp in PR
 # Feature ss09 gives back Inter's plain forms, which adds three glyphs: the
 # plain Greek iotas, defaults in Inter.
 GREEK_IOTAS = {0x0399: 0x0406, 0x038A: 0x1FDB, 0x03AA: 0x00CF}
+
+# The zero is dotted, so that 0 and O never look alike: the zero and the
+# tabular zero are Inter's outline plus one contour, a dot centered in the
+# counter and clear of it on every side. dotted_zero() checks that; the
+# spacing runs compare them by position only, except with ss10, which gives
+# back Inter's plain zero. The plain zeros are two more glyphs, which the
+# slashed, circled and squared zeros and theta are built on.
+DOTTED_ZEROS = {0x0030: "zero", 0xE071: "tabular zero"}
+PLAIN_ZEROS = ("zero.ss10", "zero.tf.ss10")
+DOT_MIN_GAP = 60  # units between the dot and the counter, on every side
 
 # Inter gave its accented serifed I and tailed l alternates no kerning of
 # their own. Ours kern like their base letter wherever that adds no overlap
@@ -156,6 +169,51 @@ def outline(glyph_set, name: str) -> List[Tuple[float, float]]:
     pen = DecomposingRecordingPen(glyph_set)
     glyph_set[name].draw(pen)
     return [p for _, args in pen.value for p in args]
+
+
+def contours(glyph_set, name: str) -> List[Tuple[List[Tuple[float, float]], Tuple[float, float, float, float]]]:
+    """Each contour of a glyph, components decomposed: its points, and its
+    bounds (the curves' own extremes, not their control points)."""
+    pen = DecomposingRecordingPen(glyph_set)
+    glyph_set[name].draw(pen)
+    found, current = [], []
+    for op, args in pen.value:
+        current.append((op, args))
+        if op in ("closePath", "endPath"):
+            bounds = BoundsPen(glyph_set)
+            for op_, args_ in current:
+                getattr(bounds, op_)(*args_)
+            found.append(([p for _, a in current for p in a], bounds.bounds))
+            current = []
+    return found
+
+
+def dotted_zero(glyph_set_a, name_a: str, glyph_set_b, name_b: str) -> List[str]:
+    """Our zero against Inter's: the same contours plus a dot, centered in
+    the counter within two units and at least DOT_MIN_GAP units from it."""
+    ours, theirs = contours(glyph_set_a, name_a), contours(glyph_set_b, name_b)
+    if len(ours) != len(theirs) + 1:
+        return [f"{len(ours)} contours, Inter's has {len(theirs)}: expected one more, the dot"]
+    for i, (_, dot) in enumerate(ours):
+        rest = ours[:i] + ours[i + 1:]
+        if all(len(a) == len(b) and max(abs(x1 - x2) + abs(y1 - y2) for (x1, y1), (x2, y2) in zip(a, b)) <= 1
+               for (a, _), (b, _) in zip(rest, theirs)):
+            break
+    else:
+        return ["no contour of ours is a dot added to Inter's zero"]
+    x0, y0, x1, y1 = dot
+    enclosing = [b for _, b in rest if b[0] < x0 and b[1] < y0 and b[2] > x1 and b[3] > y1]
+    if not enclosing:
+        return ["the dot is not inside the counter"]
+    cx0, cy0, cx1, cy1 = min(enclosing, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+    gap = min(x0 - cx0, y0 - cy0, cx1 - x1, cy1 - y1)
+    off = max(abs((x0 + x1) - (cx0 + cx1)), abs((y0 + y1) - (cy0 + cy1))) / 2
+    problems = []
+    if gap < DOT_MIN_GAP:
+        problems.append(f"the dot is {gap:.0f} units from the counter (at least {DOT_MIN_GAP})")
+    if off > 2:
+        problems.append(f"the dot is {off:.1f} units off the counter's center")
+    return problems
 
 
 def deviation(glyph_set_a, name_a: str, glyph_set_b, name_b: str) -> float:
@@ -267,8 +325,8 @@ def spacing_runs(ref: TTFont) -> List[Run]:
     return [
         # Our default I and l are Inter's cv05 and cv08 forms.
         ("default", {}, {"cv05": True, "cv08": True}, standard, GREEK_IOTAS, "round"),
-        # ss09 gives back Inter's own defaults.
-        ("ss09", {"ss09": True}, {}, standard, {}, ""),
+        # ss09 and ss10 give back Inter's own defaults.
+        ("ss09", {"ss09": True, "ss10": True}, {}, standard, {}, ""),
         # Square dots on our I and l are Inter's ss04 and ss07 forms. The
         # German sharp s, which ss04 also changes, and the Greek iotas, which
         # have no ss07 forms, are left out.
@@ -351,7 +409,8 @@ def spacing(job: Tuple[str, str, Dict[str, float], Run, str]) -> List[str]:
     kerning in the advance of its first glyph, so an advance difference is
     reported as the pair its character starts; an offset difference (a mark
     placed on the glyph before it) as the pair it ends. Characters in
-    reshaped (see reconverted) are compared by position only.
+    reshaped (see reconverted), and the dotted zeros outside ss10, are
+    compared by position only.
     """
     ours_path, ref_path, loc, (name, ours_feats, ref_feats, chars, stand_ins, dots), reshaped = job
     fonts = []
@@ -546,7 +605,7 @@ def compare(ours_path: str, ref_path: str) -> Tuple[List[str], List[str]]:
         if a != b:
             problems.append(f"{label}: ours {a!r} vs Inter {b!r}")
 
-    check("glyph count", len(ours.getGlyphOrder()), len(ref.getGlyphOrder()) + len(GREEK_IOTAS))
+    check("glyph count", len(ours.getGlyphOrder()), len(ref.getGlyphOrder()) + len(GREEK_IOTAS) + len(PLAIN_ZEROS))
     check("code points", sorted(ours.getBestCmap()), sorted(ref.getBestCmap()))
     check("axes", [(a.axisTag, a.minValue, a.defaultValue, a.maxValue) for a in ours["fvar"].axes
                    if ("axis", a.axisTag) not in KNOWN],
@@ -569,10 +628,12 @@ def compare(ours_path: str, ref_path: str) -> Tuple[List[str], List[str]]:
                      f"within {max(reshaped.values()):.2f} units: "
                      + " ".join(f"U+{cp:04X}" for cp in sorted(reshaped)))
     reshaped_chars = "".join(chr(cp) for cp in reshaped)
+    dotted_chars = "".join(chr(cp) for cp in DOTTED_ZEROS)
     runs, partners = spacing_runs(ref), standard_chars(ref)
     with ProcessPoolExecutor() as pool:
         # Spacing runs in other processes while the outlines are compared here.
-        spaced = [pool.submit(spacing, (ours_path, ref_path, loc, run, reshaped_chars))
+        spaced = [pool.submit(spacing, (ours_path, ref_path, loc, run,
+                                        reshaped_chars + ("" if run[1].get("ss10") else dotted_chars)))
                   for loc in LOCATIONS for run in runs]
         spaced += [pool.submit(kerning, (ours_path, ref_path, loc, partners)) for loc in LOCATIONS]
         if graded:
@@ -589,6 +650,10 @@ def compare(ours_path: str, ref_path: str) -> Tuple[List[str], List[str]]:
                 adv_a, adv_b = a["hmtx"][name_a][0], b["hmtx"][name_b][0]
                 if adv_a != adv_b and ("advance", cp) not in KNOWN:
                     problems.append(f"{loc} U+{cp:04X} advance: ours {adv_a} vs Inter {adv_b}")
+                if cp in DOTTED_ZEROS:
+                    problems += [f"{loc} U+{cp:04X} {DOTTED_ZEROS[cp]}: {p}"
+                                 for p in dotted_zero(gsa, name_a, gsb, name_b)]
+                    continue
                 pa, pb = outline(gsa, name_a), outline(gsb, name_b)
                 if len(pa) != len(pb):
                     if cp not in reshaped or deviation(gsa, name_a, gsb, name_b) > 1:
@@ -616,6 +681,8 @@ def main(argv: List[str] | None = None) -> int:
     print(f"known: {len(defaults)} code points show Inter's serifed I and tailed l, "
           f"{len(alternates)} private-use ones its plain forms")
     print(f"known: {len(KERNS_LIKE)} accented I and l forms kern like their base letter, checked pair by pair")
+    print(f"known: {len(DOTTED_ZEROS)} zeros are Inter's plus a centered dot ({', '.join(DOTTED_ZEROS.values())}), "
+          f"checked contour by contour")
     for (kind, key), why in KNOWN.items():
         print(f"known: {kind} {f'U+{key:04X}' if isinstance(key, int) else key} ({why})")
     print("identical to Inter except known differences" if not problems else f"{len(problems)} unexplained differences")

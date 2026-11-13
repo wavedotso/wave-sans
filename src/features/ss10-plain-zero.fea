@@ -1,0 +1,9 @@
+featureNames { name "Plain zero"; };
+
+# Inter's plain zero. Wave Sans sets a dotted zero by default, so that 0 and O
+# never look alike in a username; this set gives back the plain one, for
+# prices and display text. It comes after every other feature that changes the
+# zero (tabular figures, the slashed zero, superscripts and fractions), so it
+# only ever swaps the default and tabular zeros.
+sub zero by zero.ss10;
+sub zero.tf by zero.tf.ss10;
