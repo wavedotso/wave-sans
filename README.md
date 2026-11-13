@@ -10,11 +10,26 @@ reviewed Wave Sans change on top of them, so `git log` is the full list of
 differences from Inter. [FONTLOG.txt](FONTLOG.txt) summarizes them for people
 who use the fonts.
 
+## Axes
+
+| Axis | Range | Set with |
+|---|---|---|
+| `wght` weight | 100 to 900 | `font-weight` |
+| `opsz` optical size | 14 to 32 | automatic: it follows the font size (`font-optical-sizing: auto`) |
+| `GRAD` grade | −50 to +100 | `font-variation-settings: "GRAD" -25` |
+
+Grade changes stroke weight without changing any width or kerning, so text
+never reflows. It is measured in weight units: grade +100 has the strokes of
+weight +100. Use about −25 for light text on dark backgrounds, where text
+looks heavier, and up to +100 for hover and selected states. Axis tags are
+case-sensitive, and `font-variation-settings` replaces the value of a parent
+element rather than adding to it.
+
 ## Build
 
 ```bash
 make venv     # Python environment from requirements.txt
-make build    # build/fonts/var/WaveSans[opsz,wght].ttf
+make build    # build/fonts/var/WaveSans[GRAD,opsz,wght].ttf
 make verify   # compare with the official Inter release, glyph by glyph
 ```
 

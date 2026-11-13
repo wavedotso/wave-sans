@@ -324,7 +324,13 @@ def gen_stat(ttfont):
   #buildStatTable(ttfont, stat_axes_format_2(font_is_italic(ttfont)))
   #
   # build a version 1.1 STAT table with format 1 and 3 records:
-  buildStatTable(ttfont, stat_axes_format_3(font_is_italic(ttfont)))
+  axes = stat_axes_format_3(font_is_italic(ttfont))
+  if any(a.axisTag == "GRAD" for a in ttfont["fvar"].axes):
+    # Grade changes no style name: its one value is elidable.
+    axes.append(dict(name="Grade", tag="GRAD", values=[
+      dict(name="Normal", value=0, flags=FLAG_DEFAULT),
+    ]))
+  buildStatTable(ttfont, axes)
   #
   # build a version 1.2 STAT table with format 4 records:
   #locations = stat_locations(font_is_italic(ttfont))

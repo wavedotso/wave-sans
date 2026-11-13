@@ -1,16 +1,18 @@
 """Compare Wave Sans with the official Inter release, glyph by glyph.
 
-    .venv/bin/python tools/verify.py "build/fonts/var/WaveSans[opsz,wght].ttf" \
+    .venv/bin/python tools/verify.py "build/fonts/var/WaveSans[GRAD,opsz,wght].ttf" \
         upstream/inter-release/extracted/InterVariable.ttf
 
 Wave Sans is Inter with the changes described below (the default I and l,
-and KNOWN), and this checks that nothing else differs. It checks that no
-family name or vendor ID is still Inter's, then the glyph set, code points,
-axes, named instances and OpenType features. At several design-space
-locations it then compares each character's advance width and outline with
-Inter's glyph for it, and shapes every pair of characters with HarfBuzz,
-comparing the shapes each pair becomes and their positions, which covers
-kerning. Prints each difference; exits 1 if any is unexplained.
+the grade axis, and KNOWN), and this checks that nothing else differs. It
+checks that no family name or vendor ID is still Inter's, then the glyph set,
+code points, axes, named instances and OpenType features. At several
+design-space locations it then compares each character's advance width and
+outline with Inter's glyph for it, and shapes every pair of characters with
+HarfBuzz, comparing the shapes each pair becomes and their positions, which
+covers kerning. For the grade axis, it checks that no width or position moves
+at any grade, that no outline collapses, and that grades match the weights
+they stand for. Prints each difference; exits 1 if any is unexplained.
 """
 
 from __future__ import annotations
@@ -18,10 +20,13 @@ from __future__ import annotations
 import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 
+import pathops
 import uharfbuzz as hb
 import unicodedata2 as unicodedata
+from fontTools.pens.areaPen import AreaPen
+from fontTools.pens.perimeterPen import PerimeterPen
 from fontTools.pens.recordingPen import DecomposingRecordingPen
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
@@ -43,7 +48,13 @@ KNOWN = {
     ("feature", "cv05"): "removed: its tailed l is the default",
     ("feature", "cv08"): "removed: its serifed I is the default",
     ("feature", "ss09"): "added: Inter's plain I and l",
+    ("axis", "GRAD"): "added: grade, stroke weight without any width change",
 }
+
+# The grade axis: grade g gives the strokes of weight + g, and no advance or
+# kerning moves at any grade. At Regular, each end of the axis must match the
+# n stem of the weight it stands for, within a unit.
+REGULAR = 400
 # Inter's private-use code points for alternate marks: our toolchain's mark
 # feature attaches them to the letter before them; the v4.1 release leaves
 # them unattached. Only text that types these code points is affected.
@@ -128,6 +139,38 @@ def outline(glyph_set, name: str) -> List[Tuple[float, float]]:
     pen = DecomposingRecordingPen(glyph_set)
     glyph_set[name].draw(pen)
     return [p for _, args in pen.value for p in args]
+
+
+def deviation(glyph_set_a, name_a: str, glyph_set_b, name_b: str) -> float:
+    """Mean distance between two outlines, in font units: the area between
+    them over their length. For outlines whose curves were converted with
+    other points, so they cannot be compared point by point."""
+    paths = []
+    for glyph_set, name in ((glyph_set_a, name_a), (glyph_set_b, name_b)):
+        path = pathops.Path()
+        glyph_set[name].draw(path.getPen(glyphSet=glyph_set))
+        paths.append(path)
+    between = AreaPen()
+    pathops.op(paths[0], paths[1], pathops.PathOp.XOR).draw(between)
+    length = PerimeterPen(glyph_set_a)
+    glyph_set_a[name_a].draw(length)
+    return abs(between.value) / length.value if length.value else 0.0
+
+
+def reconverted(ours: TTFont, ref: TTFont, swap: Dict[int, int]) -> Dict[int, float]:
+    """Code points whose outline has other points than Inter's but the same
+    shape within a unit. Converting curves to TrueType over more masters (the
+    grade masters) splits a few curves differently."""
+    gsa, gsb = ours.getGlyphSet(), ref.getGlyphSet()
+    ca, cb = ours.getBestCmap(), ref.getBestCmap()
+    found = {}
+    for cp, name_a in ca.items():
+        name_b = cb.get(swap.get(cp, cp))
+        if name_b and len(outline(gsa, name_a)) != len(outline(gsb, name_b)):
+            distance = deviation(gsa, name_a, gsb, name_b)
+            if distance <= 1:
+                found[cp] = distance
+    return found
 
 
 def spaced_chars(cmap: Dict[int, str]) -> str:
@@ -283,16 +326,17 @@ def kerning(job: Tuple[str, str, Dict[str, float], str]) -> List[str]:
     return shown
 
 
-def spacing(job: Tuple[str, str, Dict[str, float], Run]) -> List[str]:
+def spacing(job: Tuple[str, str, Dict[str, float], Run, str]) -> List[str]:
     """Pairs that shape differently at one location in one run.
 
     Each pass sets one character between all the others (x y1 x y2 ...), so
     together the passes cover every ordered pair. HarfBuzz puts a pair's
     kerning in the advance of its first glyph, so an advance difference is
     reported as the pair its character starts; an offset difference (a mark
-    placed on the glyph before it) as the pair it ends.
+    placed on the glyph before it) as the pair it ends. Characters in
+    reshaped (see reconverted) are compared by position only.
     """
-    ours_path, ref_path, loc, (name, ours_feats, ref_feats, chars, stand_ins, dots) = job
+    ours_path, ref_path, loc, (name, ours_feats, ref_feats, chars, stand_ins, dots), reshaped = job
     fonts = []
     for path in (ours_path, ref_path):
         font = hb.Font(hb.Face(hb.Blob.from_file_path(path)))
@@ -312,6 +356,8 @@ def spacing(job: Tuple[str, str, Dict[str, float], Run]) -> List[str]:
             if ga == gb:
                 continue
             at = ga[0]
+            if ga[0] == gb[0] and ga[2:] == gb[2:] and text[at] in reshaped:
+                continue  # same place, outline split differently: compared by deviation()
             if dots and ga[:2] == gb[:2] and ga[3:] == gb[3:] and kerned_like_base(text, at):
                 continue  # only the kerning of a KERNS_LIKE form differs: kerning() checks it
             if ga[:3] == gb[:3]:  # same shape and advance: only its offsets differ
@@ -332,9 +378,152 @@ def spacing(job: Tuple[str, str, Dict[str, float], Run]) -> List[str]:
     return shown
 
 
-def compare(ours_path: str, ref_path: str) -> List[str]:
+class ContourAreas:
+    """Pen that records the signed area of each contour."""
+
+    def __init__(self) -> None:
+        self.areas: List[float] = []
+        self.pen = AreaPen()
+
+    def moveTo(self, p):
+        self.pen = AreaPen()
+        self.pen.moveTo(p)
+
+    def lineTo(self, p):
+        self.pen.lineTo(p)
+
+    def qCurveTo(self, *points):
+        self.pen.qCurveTo(*points)
+
+    def curveTo(self, *points):
+        self.pen.curveTo(*points)
+
+    def closePath(self):
+        self.pen.closePath()
+        self.areas.append(self.pen.value)
+
+    def endPath(self):
+        self.closePath()
+
+
+class Chords:
+    """Pen that records each segment as a straight chord: exact for the
+    straight stems the n stem is measured on."""
+
+    def __init__(self) -> None:
+        self.segments: List[Tuple[Tuple[float, float], Tuple[float, float]]] = []
+        self.start = self.current = (0.0, 0.0)
+
+    def moveTo(self, p):
+        self.start = self.current = p
+
+    def lineTo(self, p):
+        self.segments.append((self.current, p))
+        self.current = p
+
+    def qCurveTo(self, *points):
+        self.lineTo(points[-1])
+
+    def curveTo(self, *points):
+        self.lineTo(points[-1])
+
+    def closePath(self):
+        self.lineTo(self.start)
+
+    def endPath(self):
+        pass
+
+
+def n_stem(font: hb.Font, y: float) -> float:
+    """Width of the left stem of n, crossed by a horizontal line at y."""
+    pen = Chords()
+    font.draw_glyph_with_pen(font.get_nominal_glyph(ord("n")), pen)
+    xs = sorted(x0 + (y - y0) * (x1 - x0) / (y1 - y0)
+                for (x0, y0), (x1, y1) in pen.segments if (y0 <= y < y1) or (y1 <= y < y0))
+    return xs[1] - xs[0]
+
+
+def grades(job: Tuple[str, Dict[str, float], str]) -> List[str]:
+    """At one location, at both ends of the grade axis against grade 0: every
+    advance, and every pair's glyphs and kerning, stay the same (marks may
+    move with their letter); and no contour flips or loses most of its area."""
+    path, loc, chars = job
+    face = hb.Face(hb.Blob.from_file_path(path))
+    axis = next(a for a in face.axis_infos if a.tag == "GRAD")
+    font = hb.Font(face)
+    ends = (axis.min_value, axis.max_value)
+
+    def at(grade: float) -> None:
+        font.set_variations({**loc, "GRAD": grade})
+
+    def placed(text: str) -> List[Tuple[int, int, int]]:
+        buf = hb.Buffer()
+        buf.add_codepoints([ord(c) for c in text])
+        buf.guess_segment_properties()
+        hb.shape(font, buf, {})
+        return [(i.cluster, i.codepoint, p.x_advance) for i, p in zip(buf.glyph_infos, buf.glyph_positions)]
+
+    def contours() -> List[List[float]]:
+        out = []
+        for gid in range(face.glyph_count):
+            pen = ContourAreas()
+            font.draw_glyph_with_pen(gid, pen)
+            out.append(pen.areas)
+        return out
+
+    problems: List[str] = []
+    at(0)
+    advances = [font.get_glyph_h_advance(g) for g in range(face.glyph_count)]
+    areas = contours()
+    for grade in ends:
+        at(grade)
+        moved = [g for g in range(face.glyph_count) if font.get_glyph_h_advance(g) != advances[g]]
+        if moved:
+            problems.append(f"{loc} GRAD {grade:g}: {len(moved)} advances change")
+        collapsed = [g for g, (before, after) in enumerate(zip(areas, contours()))
+                     if any(abs(a) > 2000 and b / a < 0.15 for a, b in zip(before, after))]
+        if collapsed:
+            names = [font.glyph_to_string(g) for g in collapsed[:6]]
+            problems.append(f"{loc} GRAD {grade:g}: {len(collapsed)} glyphs with a collapsing contour, e.g. {names}")
+    pairs: Dict[str, str] = {}
+    for x in chars:
+        text = "".join(x + y for y in chars)
+        at(0)
+        base = placed(text)
+        for grade in ends:
+            at(grade)
+            for a, b in zip(base, placed(text)):
+                if a != b:
+                    pairs.setdefault(f"{text[a[0]:a[0] + 2]} GRAD {grade:g}", f"{b[2] - a[2]:+d} units")
+                    break
+    problems += [f"{loc} pair {pair!r} moves {why}" for pair, why in sorted(pairs.items())[:12]]
+    return problems
+
+
+def grade_matches_weight(path: str, x_height: float) -> List[str]:
+    """At Regular, each end of the grade axis has the n stem of the weight it
+    stands for (grade g, weight REGULAR + g), within a unit."""
+    face = hb.Face(hb.Blob.from_file_path(path))
+    axis = next(a for a in face.axis_infos if a.tag == "GRAD")
+    font = hb.Font(face)
+    problems = []
+    for opsz in (14, 32):
+        for grade in (axis.min_value, axis.max_value):
+            font.set_variations({"wght": REGULAR, "opsz": opsz, "GRAD": grade})
+            graded = n_stem(font, x_height / 2)
+            font.set_variations({"wght": REGULAR + grade, "opsz": opsz, "GRAD": 0})
+            weighted = n_stem(font, x_height / 2)
+            if abs(graded - weighted) > 1:
+                problems.append(f"opsz {opsz} GRAD {grade:g}: n stem {graded:.1f}, "
+                                f"weight {REGULAR + grade:g} has {weighted:.1f}")
+    return problems
+
+
+def compare(ours_path: str, ref_path: str) -> Tuple[List[str], List[str]]:
+    """Unexplained differences, and notes on the explained ones found."""
     ours, ref = TTFont(ours_path), TTFont(ref_path)
     problems: List[str] = names(ours)
+    notes: List[str] = []
 
     def check(label: str, a, b) -> None:
         if a != b:
@@ -342,7 +531,8 @@ def compare(ours_path: str, ref_path: str) -> List[str]:
 
     check("glyph count", len(ours.getGlyphOrder()), len(ref.getGlyphOrder()) + len(GREEK_IOTAS))
     check("code points", sorted(ours.getBestCmap()), sorted(ref.getBestCmap()))
-    check("axes", [(a.axisTag, a.minValue, a.defaultValue, a.maxValue) for a in ours["fvar"].axes],
+    check("axes", [(a.axisTag, a.minValue, a.defaultValue, a.maxValue) for a in ours["fvar"].axes
+                   if ("axis", a.axisTag) not in KNOWN],
           [(a.axisTag, a.minValue, a.defaultValue, a.maxValue) for a in ref["fvar"].axes])
     check("named instances", len(ours["fvar"].instances), len(ref["fvar"].instances))
     for table in ("GSUB", "GPOS"):
@@ -350,15 +540,26 @@ def compare(ours_path: str, ref_path: str) -> List[str]:
         for tag in sorted(ours_tags ^ ref_tags):
             if ("feature", tag) not in KNOWN:
                 problems.append(f"{table} feature {tag} only in {'ours' if tag in ours_tags else 'Inter'}")
+    graded = any(a.axisTag == "GRAD" for a in ours["fvar"].axes)
+    if graded:
+        problems += grade_matches_weight(ours_path, ours["OS/2"].sxHeight)
 
     defaults, alternates = default_swap(ref)
     swap = {**defaults, **alternates}
+    reshaped = reconverted(ours, ref, swap)
+    if reshaped:
+        notes.append(f"{len(reshaped)} outlines converted to TrueType curves with other points, "
+                     f"within {max(reshaped.values()):.2f} units: "
+                     + " ".join(f"U+{cp:04X}" for cp in sorted(reshaped)))
+    reshaped_chars = "".join(chr(cp) for cp in reshaped)
     runs, partners = spacing_runs(ref), standard_chars(ref)
     with ProcessPoolExecutor() as pool:
         # Spacing runs in other processes while the outlines are compared here.
-        spaced = [pool.submit(spacing, (ours_path, ref_path, loc, run))
+        spaced = [pool.submit(spacing, (ours_path, ref_path, loc, run, reshaped_chars))
                   for loc in LOCATIONS for run in runs]
         spaced += [pool.submit(kerning, (ours_path, ref_path, loc, partners)) for loc in LOCATIONS]
+        if graded:
+            spaced += [pool.submit(grades, (ours_path, loc, partners)) for loc in LOCATIONS]
         for loc in LOCATIONS:
             a = instantiateVariableFont(TTFont(ours_path), loc)
             b = instantiateVariableFont(TTFont(ref_path), loc)
@@ -373,14 +574,15 @@ def compare(ours_path: str, ref_path: str) -> List[str]:
                     problems.append(f"{loc} U+{cp:04X} advance: ours {adv_a} vs Inter {adv_b}")
                 pa, pb = outline(gsa, name_a), outline(gsb, name_b)
                 if len(pa) != len(pb):
-                    problems.append(f"{loc} U+{cp:04X} outline: {len(pa)} vs {len(pb)} points")
+                    if cp not in reshaped or deviation(gsa, name_a, gsb, name_b) > 1:
+                        problems.append(f"{loc} U+{cp:04X} outline: {len(pa)} vs {len(pb)} points")
                     continue
                 drift = max((abs(x1 - x2) + abs(y1 - y2) for (x1, y1), (x2, y2) in zip(pa, pb)), default=0)
                 if drift > 1:
                     problems.append(f"{loc} U+{cp:04X} outline drift {drift:.1f} units")
         for job in spaced:
             problems.extend(job.result())
-    return problems
+    return problems, notes
 
 
 def main(argv: List[str] | None = None) -> int:
@@ -388,9 +590,11 @@ def main(argv: List[str] | None = None) -> int:
     ap.add_argument("ours")
     ap.add_argument("inter")
     args = ap.parse_args(argv)
-    problems = compare(args.ours, args.inter)
+    problems, notes = compare(args.ours, args.inter)
     for p in problems:
         print(p)
+    for note in notes:
+        print(f"known: {note}")
     defaults, alternates = default_swap(TTFont(args.inter))
     print(f"known: {len(defaults)} code points show Inter's serifed I and tailed l, "
           f"{len(alternates)} private-use ones its plain forms")

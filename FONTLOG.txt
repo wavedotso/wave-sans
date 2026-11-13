@@ -14,7 +14,8 @@ Rasmus Andersson, released under the SIL Open Font License 1.1 (see
 LICENSE.txt). "Wave Sans" is a Reserved Font Name.
 
 It covers Latin (including Vietnamese), Greek and Cyrillic in one variable
-font, with a weight axis (100 to 900) and an optical size axis (14 to 32).
+font, with a weight axis (100 to 900), an optical size axis (14 to 32) and a
+grade axis (-50 to +100).
 
 
 Changelog
@@ -23,6 +24,9 @@ Changelog
 Most recent first.
 
 Wave Sans 1.000, in development
+- 2026-11-13: added the grade axis (GRAD, -50 to +100). Grade changes stroke
+  weight, in weight units, without changing any width or kerning; it is made
+  from Inter's own weights. The file is now WaveSans[GRAD,opsz,wght].ttf.
 - 2026-11-13: the accented serifed I forms and ļ kern like their base
   letters; Inter left these alternates without kerning of their own. ĺ, ḷ,
   ľ, ŀ and the other l forms keep Inter's kerning, since their accents would

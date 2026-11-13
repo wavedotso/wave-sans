@@ -2,14 +2,16 @@
 
     .venv/bin/python tools/proof.py build/proofs/name.png \
         --column "Inter"     upstream/inter-release/extracted/InterVariable.ttf \
-        --column "Wave Sans" "build/fonts/var/WaveSans[opsz,wght].ttf" \
+        --column "Wave Sans" "build/fonts/var/WaveSans[GRAD,opsz,wght].ttf" \
+        --column "Dark mode" "build/fonts/var/WaveSans[GRAD,opsz,wght].ttf" dark,GRAD=-25 \
         --line 110 "Il1 O0o" --line 15 "a feed post…"
 
-Each column is a label, a font file and optional OpenType features (comma
-separated, e.g. ss04,zero). Each line is a pixel size and the text. Text is
-shaped by HarfBuzz and filled by Skia, unhinted, at 2x, so it matches what a
-browser shows on a high-density screen. Optical size
-follows the pixel size, as CSS font-optical-sizing does.
+Each column is a label, a font file and optional settings, comma separated:
+OpenType features (ss04), axis values (GRAD=-25), and dark for light text on
+a dark background. Each line is a pixel size and the text. Text is shaped by
+HarfBuzz and filled by Skia, unhinted, at 2x, so it matches what a browser
+shows on a high-density screen. Optical size follows the pixel size, as CSS
+font-optical-sizing does.
 """
 
 from __future__ import annotations
@@ -27,6 +29,9 @@ INK = skia.Color(17, 20, 26)
 PAPER = skia.Color(250, 249, 246)
 MUTED = skia.Color(118, 124, 134)
 RULE = skia.Color(222, 225, 230)
+DARK_INK = skia.Color(232, 234, 238)
+DARK_PAPER = skia.Color(22, 24, 29)
+DARK_MUTED = skia.Color(140, 146, 156)
 
 
 @dataclass(frozen=True)
@@ -34,6 +39,15 @@ class Column:
     label: str
     font: Path
     features: Tuple[str, ...]
+    axes: Tuple[Tuple[str, float], ...] = ()
+    dark: bool = False
+
+    @classmethod
+    def parse(cls, label: str, font: str, settings: str = "") -> "Column":
+        items = [s for s in settings.split(",") if s]
+        axes = tuple((s.split("=")[0], float(s.split("=")[1])) for s in items if "=" in s)
+        features = tuple(s for s in items if "=" not in s and s != "dark")
+        return cls(label, Path(font), features, axes, "dark" in items)
 
 
 class _Pen:
@@ -74,6 +88,7 @@ class Setter:
         self.features: Dict[str, bool] = {f: True for f in column.features}
         axes = {a.tag: (a.min_value, a.max_value) for a in self.face.axis_infos} if self.face.axis_infos else {}
         self.axes = axes
+        self.settings = {tag: value for tag, value in column.axes if tag in axes}
 
     def path(self, text: str, px: float, x: float, baseline: float, wght: float = 400) -> Tuple[skia.Path, float]:
         font = hb.Font(self.face)
@@ -83,6 +98,7 @@ class Setter:
         if "opsz" in self.axes:
             lo, hi = self.axes["opsz"]
             variations["opsz"] = min(max(px, lo), hi)
+        variations.update(self.settings)
         if variations:
             font.set_variations(variations)
         buf = hb.Buffer()
@@ -128,11 +144,16 @@ def render(out: Path, columns: List[Column], lines: List[Tuple[float, str, float
     # Labels are set in the first column's font: no outside typeface involved.
     label_face = skia.Typeface.MakeFromFile(str(columns[0].font))
     label_font = skia.Font(label_face, 14)
-    ink, muted, rule = skia.Paint(AntiAlias=True, Color=INK), skia.Paint(AntiAlias=True, Color=MUTED), skia.Paint(Color=RULE, StrokeWidth=1)
+    muted, rule = skia.Paint(AntiAlias=True, Color=MUTED), skia.Paint(Color=RULE, StrokeWidth=1)
+    inks = [skia.Paint(AntiAlias=True, Color=DARK_INK if c.dark else INK) for c in columns]
     for i, c in enumerate(columns):
         x = pad + i * (col_width + gap)
-        cv.drawString(c.label, x, pad + 16, label_font, muted)
-        if i:
+        if c.dark:
+            left = 0 if i == 0 else x - gap / 2
+            cv.drawRect(skia.Rect(left, 0, x + col_width + gap / 2, height), skia.Paint(Color=DARK_PAPER))
+        label = skia.Paint(AntiAlias=True, Color=DARK_MUTED) if c.dark else muted
+        cv.drawString(c.label, x, pad + 16, label_font, label)
+        if i and not (c.dark or columns[i - 1].dark):
             cv.drawLine(x - gap / 2, pad, x - gap / 2, height - pad, rule)
     y = pad + head
     for px, wght, wrapped, h in blocks:
@@ -140,8 +161,8 @@ def render(out: Path, columns: List[Column], lines: List[Tuple[float, str, float
             x = pad + i * (col_width + gap)
             for j, ln in enumerate(ws):
                 p, _ = s.path(ln, px, x, y + px * 1.05 + j * px * 1.42, wght)
-                cv.drawPath(p, ink)
-        cv.drawString(f"{px:g}px · {wght:g}", width - pad - label_w + 18, y + 12, skia.Font(label_face, 10), muted)
+                cv.drawPath(p, inks[i])
+        cv.drawString(f"{px:g}px · {wght:g}", width - pad - label_w + 26, y + 12, skia.Font(label_face, 10), muted)
         y += h
     out.parent.mkdir(parents=True, exist_ok=True)
     surface.makeImageSnapshot().save(str(out), skia.kPNG)
@@ -150,11 +171,12 @@ def render(out: Path, columns: List[Column], lines: List[Tuple[float, str, float
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("out", type=Path)
-    ap.add_argument("--column", nargs="+", action="append", required=True, metavar=("LABEL", "FONT"), help="label font [features]")
+    ap.add_argument("--column", nargs="+", action="append", required=True, metavar=("LABEL", "FONT"),
+                    help="label font [settings: features, TAG=value axes, dark]")
     ap.add_argument("--line", nargs="+", action="append", required=True, metavar=("PX", "TEXT"), help="px text [wght]")
     ap.add_argument("--width", type=float, default=520)
     a = ap.parse_args(argv)
-    columns = [Column(c[0], Path(c[1]), tuple(f for f in (c[2].split(",") if len(c) > 2 else []) if f)) for c in a.column]
+    columns = [Column.parse(*c[:3]) for c in a.column]
     lines = [(float(l[0]), l[1], float(l[2]) if len(l) > 2 else 400.0) for l in a.line]
     render(a.out, columns, lines, a.width)
     print(f"wrote {a.out}")
