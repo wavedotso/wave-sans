@@ -24,6 +24,12 @@ Changelog
 Most recent first.
 
 Wave Sans 1.000, in development
+- 2026-11-13: web fonts. WOFF2 files split by character set, with a
+  stylesheet that loads only the files a page uses: Latin, Latin for living
+  languages, phonetic and historic Latin, Vietnamese, Greek, polytonic
+  Greek, Cyrillic, extended Cyrillic, symbols, letterlike forms and
+  private-use alternates. Each keeps every axis and OpenType feature.
+  WaveSans.woff2 is the whole font in one file.
 - 2026-11-13: added the grade axis (GRAD, -50 to +100). Grade changes stroke
   weight, in weight units, without changing any width or kerning; it is made
   from Inter's own weights. The file is now WaveSans[GRAD,opsz,wght].ttf.

@@ -25,12 +25,42 @@ looks heavier, and up to +100 for hover and selected states. Axis tags are
 case-sensitive, and `font-variation-settings` replaces the value of a parent
 element rather than adding to it.
 
+## Web
+
+`make build` also writes web fonts to `build/fonts/web/`: WOFF2 files split
+by character set, and `wave-sans.css`, which loads them. Serve the folder and
+link the stylesheet:
+
+```html
+<link rel="stylesheet" href="/fonts/wave-sans.css">
+```
+
+```css
+body { font-family: "Wave Sans", system-ui, sans-serif; }
+```
+
+A browser downloads only the files whose characters a page uses. An English
+page needs `WaveSans-latin.woff2` (about 140 KB); a Polish page adds
+`latin-ext` (about 70 KB); a Russian page needs `cyrillic`, plus `latin` for
+digits and punctuation. Letters of living languages are split from phonetic
+and historic ones, and symbols, letterlike forms and private-use alternates
+have files of their own, so together the files cover every character. Every
+file has all three axes and every OpenType feature. Preloading the Latin file
+avoids a flash of fallback text:
+
+```html
+<link rel="preload" href="/fonts/WaveSans-latin.woff2" as="font" type="font/woff2" crossorigin>
+```
+
+`WaveSans.woff2` is the whole font in one file (about 460 KB), for setups
+that do not split by character.
+
 ## Build
 
 ```bash
 make venv     # Python environment from requirements.txt
-make build    # build/fonts/var/WaveSans[GRAD,opsz,wght].ttf
-make verify   # compare with the official Inter release, glyph by glyph
+make build    # build/fonts/var/WaveSans[GRAD,opsz,wght].ttf and build/fonts/web/
+make verify   # compare with the official Inter release glyph by glyph, and the web fonts with the build
 ```
 
 Review images: `tools/proof.py` sets the same lines side by side in several
