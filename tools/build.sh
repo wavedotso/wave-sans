@@ -12,6 +12,15 @@ WEB="${2:?usage: tools/build.sh <output font> <web fonts folder>}"
 BIN=.venv/bin
 UFO=build/ufo
 OUT="$(dirname "$FONT")"
+
+# Start from an empty build/ufo, so no step overwrites a folder: Finder can
+# recreate .DS_Store inside a folder while it is deleted, which fails with
+# "Directory not empty". Retry the delete a few times.
+for attempt in 1 2 3 4 5; do
+  rm -rf "$UFO" 2>/dev/null && break
+  [ "$attempt" = 5 ] && rm -rf "$UFO"
+  sleep 0.2
+done
 mkdir -p "$UFO" "$OUT"
 ln -sfn ../../src/features "$UFO/features"
 
