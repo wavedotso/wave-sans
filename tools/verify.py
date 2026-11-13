@@ -1,11 +1,12 @@
 """Compare our build with the official Inter release, glyph by glyph.
 
-    .venv/bin/python tools/verify.py build/fonts/var/InterVariable.ttf \
+    .venv/bin/python tools/verify.py "build/fonts/var/WaveSans[opsz,wght].ttf" \
         upstream/inter-release/extracted/InterVariable.ttf
 
-Checks glyph set, code points, axes, named instances and OpenType features,
-then advance widths and every outline point at several design-space
-locations. Prints each difference; exits 1 if any is not listed in KNOWN.
+Checks that no family name or vendor ID is still Inter's, then glyph set, code
+points, axes, named instances and OpenType features, then advance widths and
+every outline point at several design-space locations. Prints each difference;
+exits 1 if any is not listed in KNOWN.
 """
 
 from __future__ import annotations
@@ -35,6 +36,22 @@ KNOWN = {
 }
 
 
+# Name records that present the family to users: family, unique, full and
+# PostScript names, and the variations prefix. The original project reserves
+# "Inter", so none of them may carry it. The copyright notice (ID 0) keeps
+# Inter's line, as the license requires.
+PRESENTED_NAME_IDS = {1, 3, 4, 6, 16, 17, 18, 21, 22, 25}
+
+
+def names(font: TTFont) -> List[str]:
+    ids = PRESENTED_NAME_IDS | {i.postscriptNameID for i in font["fvar"].instances}
+    problems = [f"name ID {r.nameID} still says Inter: {r.toUnicode()!r}"
+                for r in font["name"].names if r.nameID in ids and "Inter" in r.toUnicode()]
+    if font["OS/2"].achVendID == "RSMS":
+        problems.append("OS/2 vendor ID is still Inter's (RSMS)")
+    return problems
+
+
 def features(font: TTFont, table: str) -> List[str]:
     return sorted({r.FeatureTag for r in font[table].table.FeatureList.FeatureRecord})
 
@@ -47,7 +64,7 @@ def outline(glyph_set, name: str) -> List[Tuple[float, float]]:
 
 def compare(ours_path: str, ref_path: str) -> List[str]:
     ours, ref = TTFont(ours_path), TTFont(ref_path)
-    problems: List[str] = []
+    problems: List[str] = names(ours)
 
     def check(label: str, a, b) -> None:
         if a != b:

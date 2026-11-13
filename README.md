@@ -2,16 +2,19 @@
 
 Wave's typeface, built on [Inter](https://github.com/rsms/inter) v4.1 by
 Rasmus Andersson, under the SIL Open Font License 1.1 ([LICENSE.txt](LICENSE.txt)).
+"Wave Sans" is a Reserved Font Name: a modified version must be published
+under another name.
 
 The first commit is Inter's sources, untouched. Every later commit is one
 reviewed Wave Sans change on top of them, so `git log` is the full list of
-differences from Inter.
+differences from Inter. [FONTLOG.txt](FONTLOG.txt) summarizes them for people
+who use the fonts.
 
 ## Build
 
 ```bash
 make venv     # Python environment from requirements.txt
-make build    # build/fonts/var/InterVariable.ttf
+make build    # build/fonts/var/WaveSans[opsz,wght].ttf
 make verify   # compare with the official Inter release, glyph by glyph
 ```
 

@@ -25,18 +25,19 @@ def fixup_instance(designspace, instance):
   # If you change this, also update bake-vf.py to match.
   # See https://github.com/rsms/inter/issues/577
   isItalic = "Italic" in instance.styleName
+  psFamily = remove_whitespace(instance.familyName)
   psStyle = remove_whitespace(instance.styleName)
   if isItalic:
     psStyle = psStyle.replace('Italic','')
     if psStyle == '':
-      instance.postScriptFontName = 'InterVariableItalic'
+      instance.postScriptFontName = psFamily + 'Italic'
     else:
-      instance.postScriptFontName = 'InterVariableItalic-' + psStyle
+      instance.postScriptFontName = psFamily + 'Italic-' + psStyle
   else:
     if psStyle == 'Regular':
-      instance.postScriptFontName = 'InterVariable'
+      instance.postScriptFontName = psFamily
     else:
-      instance.postScriptFontName = 'InterVariable-' + psStyle
+      instance.postScriptFontName = psFamily + '-' + psStyle
 
   instance.styleMapFamilyName = instance.styleMapFamilyName.replace(' Display', '')
 
@@ -60,12 +61,12 @@ def fixup_instances(designspace):
     i -= 1
     instance = designspace.instances[i]
     if USE_DISPLAY_AS_DEFAULT:
-      if instance.name.find('Inter Display') != -1:
+      if instance.name.find(' Display') != -1:
         fixup_instance(designspace, instance)
       else:
         del designspace.instances[i]
     else:
-      if instance.name.find('Inter Display') == -1:
+      if instance.name.find(' Display') == -1:
         fixup_instance(designspace, instance)
       else:
         del designspace.instances[i]
@@ -83,7 +84,7 @@ def fixup_sources(designspace):
   while i > 0:
     i -= 1
     source = designspace.sources[i]
-    if source.name.find('Inter Display') != -1:
+    if source.name.find(' Display') != -1:
       fixup_names(source)
     else:
       source.name = source.name + ' Text'

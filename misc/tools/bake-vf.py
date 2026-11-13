@@ -1,24 +1,23 @@
 """
-This script "bakes" the final Inter variable fonts.
+This script "bakes" the final variable fonts.
 
 This script performs the following:
-  1. Renames the family to "Inter Variable"
-  2. Updates style names to scrub away "Display"
-  3. Builds a STAT table
+  1. Renames the family, when --family is given (the sources name it)
+  2. Sets name ID 25, the Variations PostScript Name Prefix
+  3. Updates style names to scrub away "Display"
+  4. Builds a STAT table
 
 How to debug/develop this script:
 
-1. build the initial fonts:
+1. build the fonts:
 
-  make -j var
+  make build
 
-2. after making changes, run script and inspect with ttx:
+2. after making changes, run the script on the unbaked font and inspect
+   the result with ttx:
 
-  (. build/venv/bin/activate && mkdir -p build/bake &&
-    for f in build/fonts/var/.Inter-*.var.ttf; do
-      python misc/tools/bake-vf.py "$f" -o build/bake/"$(basename "${f/.Inter/Inter}")"
-    done)
-  (. build/venv/bin/activate && ttx -t STAT -i -f -s build/bake/Inter-*.var.ttf)
+  .venv/bin/python misc/tools/bake-vf.py build/fonts/var/.WaveSans-Roman.var.ttf -o build/bake.ttf
+  .venv/bin/ttx -t STAT -t name -o - build/bake.ttf
 
 """
 import sys, os, os.path, re, argparse
@@ -265,7 +264,6 @@ def setFamilyName(font, nextFamilyName):
       psPrevFamilyNames.append(s)
 
   psNextFamilyName = nextFamilyName.replace(" ", "")
-  found_VAR_PS_NAME_PREFIX = False
   nameTable = font["name"]
 
   for rec in nameTable.names:
@@ -295,20 +293,24 @@ def setFamilyName(font, nextFamilyName):
       # If present in a variable font, it may be used as the family prefix in the
       # PostScript Name Generation for Variation Fonts algorithm.
       # The character set is restricted to ASCII-range uppercase Latin letters,
-      # lowercase Latin letters, and digits.
-      found_VAR_PS_NAME_PREFIX = True
+      # lowercase Latin letters, and digits. setVarPSNamePrefix rewrites it.
       old, new = renameRecord(rec, prevFamilyNames, nextFamilyName)
     else:
       old, new = renameRecord(rec, prevFamilyNames, nextFamilyName)
     # print("  %r: '%s' -> '%s'" % (rec, old, new))
 
-  # add name ID 25 "Variations PostScript Name Prefix" if not found
-  if not found_VAR_PS_NAME_PREFIX and nextFamilyName.find('Variable') != -1:
-    varPSNamePrefix = remove_whitespace(nextFamilyName)
-    if font_is_italic(font):
-      varPSNamePrefix += 'Italic'
-    nameTable.setName(varPSNamePrefix, VAR_PS_NAME_PREFIX, 1, 0, 0)     # mac
-    nameTable.setName(varPSNamePrefix, VAR_PS_NAME_PREFIX, 3, 1, 0x409) # windows
+
+def setVarPSNamePrefix(font):
+  # Name ID 25 "Variations PostScript Name Prefix", taken from the family name.
+  # It must differ between the roman and italic fonts, and match the instance
+  # PostScript names set by gen-var-designspace.py.
+  # See https://github.com/rsms/inter/issues/577
+  varPSNamePrefix = remove_whitespace(getFamilyName(font))
+  if font_is_italic(font):
+    varPSNamePrefix += 'Italic'
+  nameTable = font["name"]
+  nameTable.setName(varPSNamePrefix, VAR_PS_NAME_PREFIX, 1, 0, 0)     # mac
+  nameTable.setName(varPSNamePrefix, VAR_PS_NAME_PREFIX, 3, 1, 0x409) # windows
 
 
 def gen_stat(ttfont):
@@ -365,7 +367,7 @@ def main():
     description='Generate STAT table for variable font family')
   a = lambda *args, **kwargs: argparser.add_argument(*args, **kwargs)
   a('--family', metavar='<name>',
-    help='Rename family to <name> instead of "Inter Variable"')
+    help='Rename the family to <name> (default: keep the family of the sources)')
   a('-o', '--output', metavar='<file>',
     help='Output font file. Defaults to input file (overwrite)')
   a('input', metavar='<file>', help='Input font file')
@@ -387,9 +389,9 @@ def main():
       break
 
   # set family name
-  if not args.family:
-    args.family = "Inter Variable"
-  setFamilyName(ttfont, args.family)
+  if args.family:
+    setFamilyName(ttfont, args.family)
+  setVarPSNamePrefix(ttfont)
 
   # set style name
   stylename = remove_substring(getStyleName(ttfont), "Display")

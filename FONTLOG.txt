@@ -1,0 +1,44 @@
+FONTLOG for Wave Sans
+=====================
+
+This file provides detailed information on the Wave Sans font software. This
+information should be distributed along with the Wave Sans fonts and any
+derivative works.
+
+
+Basic font information
+----------------------
+
+Wave Sans is the typeface of Wave. It is a Modified Version of Inter 4.1 by
+Rasmus Andersson, released under the SIL Open Font License 1.1 (see
+LICENSE.txt). "Wave Sans" is a Reserved Font Name.
+
+It covers Latin (including Vietnamese), Greek and Cyrillic in one variable
+font, with a weight axis (100 to 900) and an optical size axis (14 to 32).
+
+
+Changelog
+---------
+
+Most recent first.
+
+Wave Sans 1.000, in development
+- 2026-11-13: renamed from Inter to Wave Sans: family, file and PostScript
+  names, font credits and vendor ID (WAVE). Letters, spacing and OpenType
+  features are Inter 4.1's, unchanged.
+
+
+Acknowledgements
+----------------
+
+N: Rasmus Andersson
+W: https://rsms.me/
+D: Designer of Inter, the typeface Wave Sans is built on
+
+N: The Inter Project Authors
+W: https://github.com/rsms/inter
+D: Inter 4.1, the sources Wave Sans starts from
+
+N: Wave
+W: https://wave.so
+D: Wave Sans, the changes listed above

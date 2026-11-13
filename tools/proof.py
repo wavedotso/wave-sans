@@ -1,8 +1,8 @@
 """Comparison sheets for reviews: the same lines set in several font setups.
 
     .venv/bin/python tools/proof.py build/proofs/name.png \
-        --column "Inter today"   build/fonts/var/InterVariable.ttf \
-        --column "Wave defaults" build/fonts/var/InterVariable.ttf ss04 \
+        --column "Inter"     upstream/inter-release/extracted/InterVariable.ttf \
+        --column "Wave Sans" "build/fonts/var/WaveSans[opsz,wght].ttf" \
         --line 110 "Il1 O0o" --line 15 "a feed post…"
 
 Each column is a label, a font file and optional OpenType features (comma
