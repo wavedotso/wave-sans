@@ -55,6 +55,15 @@ avoids a flash of fallback text:
 `WaveSans.woff2` is the whole font in one file (about 460 KB), for setups
 that do not split by character.
 
+## Specimen
+
+`specimen/index.html` shows the font at work: usernames, grade, sizes and
+weights, languages with the files each one loads, OpenType features and every
+character. `make specimen` copies it and the web fonts into `build/specimen`
+and serves it at http://localhost:8000. That folder is the whole site, so any
+web server can host it. `make verify` checks that the font has every
+character the page uses.
+
 ## Build
 
 ```bash
@@ -62,6 +71,7 @@ make venv     # Python environment from requirements.txt
 make build    # build/fonts/var/WaveSans[GRAD,opsz,wght].ttf and build/fonts/web/
 make verify   # compare with the official Inter release glyph by glyph, and the web fonts with the build
 make qa       # FontBakery's checks, and confusable pairs measured against Inter
+make specimen # the specimen page, served at http://localhost:8000
 ```
 
 `make qa` runs FontBakery's universal checks and fails on any difference,
@@ -85,6 +95,7 @@ https://github.com/rsms/inter/releases/tag/v4.1).
 | Path | What it is |
 |---|---|
 | `src/` | Font sources (Glyphs 3 packages, OpenType feature files) |
+| `specimen/` | The specimen page |
 | `misc/tools/` | Inter's build scripts that Wave Sans uses |
 | `tools/` | Wave Sans build, verification and proof sheets |
 | `upstream/` | Inter checkout and release, for reference (not in git) |

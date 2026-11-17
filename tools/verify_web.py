@@ -20,7 +20,9 @@ characters. This checks that:
   design-space locations, both ends of the grade axis included, it compares
   every outline and advance, every ordered pair of the file's characters,
   and a run of all of them with each OpenType feature on;
-- the one-file WOFF2 has the font's tables unchanged, glyph names aside.
+- the one-file WOFF2 has the font's tables unchanged, glyph names aside;
+- with --specimen, every character of the specimen page is in some file, so
+  the page never shows a character in another font.
 
 Prints each problem; exits 1 if any.
 """
@@ -262,10 +264,18 @@ def shaping(job: Tuple[bytes, Dict[str, Tuple[bytes, List[int]]], List[str], Dic
     return problems
 
 
+def specimen(page: Path, covered: Set[int]) -> List[str]:
+    """The characters of a page that no file covers (line breaks and tabs aside)."""
+    used = {ord(ch) for ch in page.read_text(encoding="utf-8")} - {0x09, 0x0A, 0x0D}
+    return [f"{page}: U+{cp:04X} {unicodedata.name(chr(cp), '')} is in no web font file"
+            for cp in sorted(used - covered)]
+
+
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("font", type=Path, help="the variable font (TTF)")
     ap.add_argument("web", type=Path, help="the web fonts folder")
+    ap.add_argument("--specimen", type=Path, help="a page set in the web fonts (specimen/index.html)")
     args = ap.parse_args(argv)
     font = TTFont(args.font)
     cmap = set(font.getBestCmap())
@@ -273,6 +283,8 @@ def main(argv: List[str] | None = None) -> int:
     css = args.web / "wave-sans.css"
     problems, files = stylesheet(css.read_text(), args.web, font, whole)
     problems += coverage(files, cmap)
+    if args.specimen:
+        problems += specimen(args.specimen, set().union(*files.values()))
 
     web_files: Dict[str, Tuple[bytes, List[int]]] = {}
     for file, points in files.items():
