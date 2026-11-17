@@ -1,0 +1,39 @@
+{
+  "name": "@waveso/sans",
+  "version": "0.1.0",
+  "description": "The typeface of Wave: a variable sans serif for screens, precise at small sizes, refined at large ones, and unambiguous in every name.",
+  "license": "OFL-1.1",
+  "author": "Wave (https://wave.so)",
+  "keywords": [
+    "font",
+    "typeface",
+    "variable-font",
+    "woff2",
+    "wave-sans"
+  ],
+  "files": [
+    "wave-sans.css",
+    "*.woff2",
+    "*.ttf",
+    "LICENSE.txt",
+    "FONTLOG.txt"
+  ],
+  "main": "wave-sans.css",
+  "style": "wave-sans.css",
+  "exports": {
+    ".": {
+      "style": "./wave-sans.css",
+      "default": "./wave-sans.css"
+    },
+    "./wave-sans.css": "./wave-sans.css",
+    "./*.woff2": "./*.woff2",
+    "./*.ttf": "./*.ttf",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

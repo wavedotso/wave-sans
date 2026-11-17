@@ -8,15 +8,18 @@
 #                 next to Inter
 #   make specimen the specimen page and the web fonts in build/specimen,
 #                 served at http://localhost:8000 (PORT=... to change it)
+#   make package  the npm package @waveso/sans in build/package, published
+#                 with: pnpm publish build/package
 #   make clean    remove build/
 
 FONT := build/fonts/var/WaveSans[GRAD,opsz,wght].ttf
 WEB := build/fonts/web
 SPECIMEN := build/specimen
+PACKAGE := build/package
 PORT ?= 8000
 INTER_RELEASE ?= upstream/inter-release/extracted/InterVariable.ttf
 
-.PHONY: venv build verify qa specimen clean
+.PHONY: venv build verify qa specimen package clean
 
 venv: .venv/.ok
 
@@ -46,6 +49,9 @@ specimen: venv
 	cp "$(WEB)/wave-sans.css" "$(WEB)"/WaveSans-*.woff2 "$(SPECIMEN)/fonts/"
 	@echo "specimen at http://localhost:$(PORT) (Ctrl-C stops it)"
 	.venv/bin/python -m http.server "$(PORT)" --bind 127.0.0.1 --directory "$(SPECIMEN)"
+
+package: venv
+	.venv/bin/python tools/package.py "$(FONT)" "$(WEB)" "$(PACKAGE)"
 
 clean:
 	rm -rf build

@@ -23,7 +23,7 @@ Changelog
 
 Most recent first.
 
-Wave Sans 1.000, in development
+Wave Sans 0.1, in development
 - 2026-11-13: the zero is dotted by default, so that 0 and O never look alike
   in a username: Inter's zero with a dot centered in its counter, in every
   weight, for the default and tabular zeros. Stylistic set ss10 "Plain zero"
