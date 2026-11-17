@@ -10,6 +10,7 @@
 #                 served at http://localhost:8000 (PORT=... to change it)
 #   make package  the npm package @waveso/sans in build/package, published
 #                 with: pnpm publish build/package
+#   make assets   the README images in assets/, drawn from the font
 #   make clean    remove build/
 
 FONT := build/fonts/var/WaveSans[GRAD,opsz,wght].ttf
@@ -19,7 +20,7 @@ PACKAGE := build/package
 PORT ?= 8000
 INTER_RELEASE ?= upstream/inter-release/extracted/InterVariable.ttf
 
-.PHONY: venv build verify qa specimen package clean
+.PHONY: venv build verify qa specimen package assets clean
 
 venv: .venv/.ok
 
@@ -52,6 +53,9 @@ specimen: venv
 
 package: venv
 	.venv/bin/python tools/package.py "$(FONT)" "$(WEB)" "$(PACKAGE)"
+
+assets: venv
+	.venv/bin/python tools/assets.py "$(FONT)" assets
 
 clean:
 	rm -rf build

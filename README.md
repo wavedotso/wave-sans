@@ -1,108 +1,218 @@
-# Wave Sans
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg" />
+    <img src="assets/wordmark-light.svg" alt="Wave Sans" width="320" />
+  </picture>
 
-Wave's typeface, built on [Inter](https://github.com/rsms/inter) v4.1 by
-Rasmus Andersson, under the SIL Open Font License 1.1 ([LICENSE.txt](LICENSE.txt)).
-"Wave Sans" is a Reserved Font Name: a modified version must be published
-under another name.
+  <p><strong>The typeface of Wave: a variable sans serif for screens,<br />precise at small sizes, refined at large ones, and unambiguous in every name.</strong></p>
 
-The first commit is Inter's sources, untouched. Every later commit is one
-reviewed Wave Sans change on top of them, so `git log` is the full list of
-differences from Inter. [FONTLOG.txt](FONTLOG.txt) summarizes them for people
-who use the fonts.
+  [![npm](https://img.shields.io/npm/v/@waveso/sans)](https://www.npmjs.com/package/@waveso/sans)
+  [![license](https://img.shields.io/badge/license-OFL--1.1-0074DE)](./LICENSE.txt)
+  ![axes](https://img.shields.io/badge/axes-wght%20%C2%B7%20opsz%20%C2%B7%20GRAD-0074DE)
 
-## Axes
+  <br />
 
-| Axis | Range | Set with |
-|---|---|---|
-| `wght` weight | 100 to 900 | `font-weight` |
-| `opsz` optical size | 14 to 32 | automatic: it follows the font size (`font-optical-sizing: auto`) |
-| `GRAD` grade | −50 to +100 | `font-variation-settings: "GRAD" -25` |
+  <img src="assets/showcase.svg" alt="Wave Sans in Wave's three themes: I, l, 1, O and 0, distinct by default; the weights from Thin to Black; Latin, Greek and Cyrillic" width="760" />
+</div>
 
-Grade changes stroke weight without changing any width or kerning, so text
-never reflows. It is measured in weight units: grade +100 has the strokes of
-weight +100. Use about −25 for light text on dark backgrounds, where text
-looks heavier, and up to +100 for hover and selected states. Axis tags are
-case-sensitive, and `font-variation-settings` replaces the value of a parent
-element rather than adding to it.
+---
 
-## Web
+## Why Wave Sans
 
-`make build` also writes web fonts to `build/fonts/web/`: WOFF2 files split
-by character set, and `wave-sans.css`, which loads them. Serve the folder and
-link the stylesheet:
+A typeface for a social product has three jobs: set every name so it reads
+one way, keep dense interface text clear at small sizes, and look the same
+in light and dark themes. Wave Sans is built for all three.
 
-```html
-<link rel="stylesheet" href="/fonts/wave-sans.css">
+- **Unambiguous.** The capital I has serifs, the lowercase l a tail and the
+  zero a dot, by default. I, l and 1 never look alike, nor do O and 0, so a
+  username reads exactly as it was written. The plain forms are one line of
+  CSS away.
+- **Made for screens.** A tall x-height, open shapes and even spacing keep
+  text clear from 11 px. Optical size follows the font size on its own:
+  sturdier and more open for text, finer and tighter for headlines.
+- **Steady in every theme.** Grade changes stroke weight without changing a
+  single width. Lighten text on dark backgrounds so it matches its weight on
+  light ones, or strengthen a selected tab, and nothing on the page moves.
+- **Global.** Over 2,100 characters across Latin, Greek and Cyrillic, from
+  Vietnamese and Yoruba to polytonic Greek.
+- **Light on the web.** The web fonts come in eleven files by character set,
+  and a browser downloads only the ones a page uses: about 140 KB for
+  English.
+- **Complete.** A continuous weight range from Thin to Black, tabular and
+  case-sensitive forms, fractions, and a full set of stylistic sets and
+  character variants.
+- **Open.** The SIL Open Font License, editable sources, and a build anyone
+  can rerun and verify.
+
+## Installation
+
+```bash
+pnpm add @waveso/sans
+```
+
+## Usage
+
+Import the stylesheet once, in your app's entry file or root layout, and set
+the family:
+
+```js
+import '@waveso/sans';
 ```
 
 ```css
-body { font-family: "Wave Sans", system-ui, sans-serif; }
+body {
+  font-family: "Wave Sans", system-ui, sans-serif;
+}
 ```
 
-A browser downloads only the files whose characters a page uses. An English
-page needs `WaveSans-latin.woff2` (about 140 KB); a Polish page adds
-`latin-ext` (about 70 KB); a Russian page needs `cyrillic`, plus `latin` for
-digits and punctuation. Letters of living languages are split from phonetic
-and historic ones, and symbols, letterlike forms and private-use alternates
-have files of their own, so together the files cover every character. Every
-file has all three axes and every OpenType feature. Preloading the Latin file
-avoids a flash of fallback text:
+Without a bundler, serve the web fonts folder and link its stylesheet.
+Preloading the Latin file avoids a flash of fallback text:
 
 ```html
 <link rel="preload" href="/fonts/WaveSans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/wave-sans.css">
 ```
 
-`WaveSans.woff2` is the whole font in one file (about 460 KB), for setups
-that do not split by character.
+### Light and dark
 
-`make package` puts these files and the variable font in `build/package`:
-the npm package `@waveso/sans`, published with `pnpm publish build/package`.
-`package/` holds its manifest and readme; the package version follows the
-font version (font 1.000 is package 1.0.x).
+Light text on a dark background looks heavier than dark text on a light one.
+Lower the grade in dark themes, and raise it for selected and hovered
+states. Widths never change, so nothing reflows.
+
+```css
+.dark { font-variation-settings: "GRAD" -25; }
+[aria-selected="true"] { font-variation-settings: "GRAD" 100; }
+```
+
+`font-variation-settings` replaces the value an element inherits instead of
+adding to it, so set every axis you need in the same declaration.
+
+### Plain forms
+
+`ss09` gives back the plain I and l, and `ss10` the plain zero:
+
+```css
+.plain { font-feature-settings: "ss09", "ss10"; }
+```
+
+## Axes
+
+| Axis | Range | Default | Set with |
+|---|---|---|---|
+| Weight `wght` | 100 to 900 | 400 | `font-weight` |
+| Optical size `opsz` | 14 to 32 | the font size | `font-optical-sizing: auto` |
+| Grade `GRAD` | −50 to +100 | 0 | `font-variation-settings` |
+
+Grade is measured in weight units: at +100, strokes are as heavy as a weight
+100 higher, at the same width.
+
+## Features
+
+| Feature | CSS |
+|---|---|
+| Tabular figures | `font-variant-numeric: tabular-nums` |
+| Fractions | `font-variant-numeric: diagonal-fractions` |
+| Slashed zero | `font-variant-numeric: slashed-zero` |
+| Superscripts and subscripts | `font-variant-position: super` and `sub` |
+| Case-sensitive forms | `font-feature-settings: "case"` |
+| Plain I and l | `font-feature-settings: "ss09"` |
+| Plain zero | `font-feature-settings: "ss10"` |
+| Open digits | `font-feature-settings: "ss01"` |
+| Round quotes and commas | `font-feature-settings: "ss03"` |
+| Circled and squared characters | `font-feature-settings: "ss05"` and `"ss06"` |
+| Square punctuation and quotes | `font-feature-settings: "ss07"` and `"ss08"` |
+| Alternate one | `font-feature-settings: "cv01"` |
+| Open four, six and nine | `font-feature-settings: "cv02"`, `"cv03"` and `"cv04"` |
+| Flat-top three | `font-feature-settings: "cv09"` |
+| Simplified u | `font-feature-settings: "cv06"` |
+| Single-storey a | `font-feature-settings: "cv11"` |
+| Capital G with spur | `font-feature-settings: "cv10"` |
+| Compact f and t | `font-feature-settings: "cv12"` and `"cv13"` |
+| Alternate ß and ẞ | `font-feature-settings: "cv07"` and `"cv14"` |
+
+## Files
+
+`make build` writes the fonts to `build/fonts/`:
+
+| File | What it is |
+|---|---|
+| `var/WaveSans[GRAD,opsz,wght].ttf` | The variable font, for apps and design tools |
+| `web/wave-sans.css`, `web/WaveSans-*.woff2` | The web fonts in eleven files by character set, and the stylesheet that loads them |
+| `web/WaveSans.woff2` | The whole font in one file, for setups that do not split by character |
+
+Every file has all three axes and every OpenType feature. An English page
+loads only `WaveSans-latin.woff2`, about 140 KB. A Polish page adds
+`latin-ext`, about 70 KB; a Russian page needs `cyrillic`, plus `latin` for
+digits and punctuation.
 
 ## Specimen
 
-`specimen/index.html` shows the font at work: usernames, grade, sizes and
-weights, languages with the files each one loads, OpenType features and every
-character. `make specimen` copies it and the web fonts into `build/specimen`
-and serves it at http://localhost:8000. That folder is the whole site, so any
-web server can host it. `make verify` checks that the font has every
-character the page uses.
-
-## Build
+[specimen/index.html](specimen/index.html) shows the font at work: names,
+grade, sizes and weights, languages with the files each one loads, features
+and every character.
 
 ```bash
-make venv     # Python environment from requirements.txt
-make build    # build/fonts/var/WaveSans[GRAD,opsz,wght].ttf and build/fonts/web/
-make verify   # compare with the official Inter release glyph by glyph, and the web fonts with the build
-make qa       # FontBakery's checks, and confusable pairs measured against Inter
-make specimen # the specimen page, served at http://localhost:8000
-make package  # the npm package @waveso/sans, in build/package
+make specimen   # served at http://localhost:8000
 ```
 
-`make qa` runs FontBakery's universal checks and fails on any difference,
-item by item, from the problems recorded in `tools/qa-known.json`;
-`tools/qa.py` gives the reason each one is accepted. It then measures how
-alike confusable pairs look at 11, 12, 13, 14 and 16 px on 1x and 2x screens,
-Wave Sans against Inter: I l 1, O 0 o, rn m, cl d and vv w, and I T, l t and
-l L, which the serifed I and tailed l bring a little closer. A score compares
-one pair across the two fonts, not one pair with another.
-`tools/legibility.py --image <file>` draws the pairs at 12 px, pixel by pixel.
+Browsers do not load fonts from a page opened as a file, so the page is
+served. `build/specimen` is the whole site: any web server can host it.
 
-Review images: `tools/proof.py` sets the same lines side by side in several
-font setups (see its `--help`).
+## Development
 
-`make verify` and `make qa` need Inter's v4.1 release unpacked in
-`upstream/inter-release/extracted/` (download `Inter-4.1.zip` from
+Building needs Python 3 and make.
+
+```bash
+make venv       # Python environment from requirements.txt
+make build      # the variable font and the web fonts
+make verify     # compare the build with the upstream release, glyph by glyph
+make qa         # FontBakery's checks and the confusable-pairs benchmark
+make specimen   # the specimen, at http://localhost:8000
+make package    # the npm package, in build/package
+make assets     # the README images, drawn from the font
+```
+
+The history starts from the upstream sources, untouched, and every later
+commit is one reviewed change. `make verify` compares every outline,
+advance and kerning pair with the upstream release and fails on any
+difference it cannot explain: each intended change is listed in
+`tools/verify.py` with its reason. It needs Inter's v4.1 release unpacked in
+`upstream/inter-release/extracted/` (`Inter-4.1.zip`, from
 https://github.com/rsms/inter/releases/tag/v4.1).
 
-## Layout
+`make qa` runs FontBakery's universal checks and fails on any change from
+the problems recorded in `tools/qa-known.json`, where `tools/qa.py` gives
+each one's reason. It then measures how alike confusable pairs look at 11
+to 16 px on 1x and 2x screens: I l 1, O 0 o, rn m, cl d and vv w.
 
-| Path | What it is |
-|---|---|
-| `src/` | Font sources (Glyphs 3 packages, OpenType feature files) |
-| `specimen/` | The specimen page |
-| `package/` | The npm package's manifest and readme |
-| `misc/tools/` | Inter's build scripts that Wave Sans uses |
-| `tools/` | Wave Sans build, verification and proof sheets |
-| `upstream/` | Inter checkout and release, for reference (not in git) |
+`tools/proof.py` sets the same lines side by side in several font setups,
+for review images.
+
+### Project structure
+
+```
+assets/        README images, drawn from the font
+misc/tools/    upstream build scripts the build uses
+package/       npm package manifest and readme
+specimen/      the specimen page
+src/           font sources: Glyphs 3 packages and OpenType feature files
+tools/         build, verification, QA, web fonts, package and images
+upstream/      upstream checkout and release, for verification (not in git)
+```
+
+## Releasing
+
+The package version follows the font version: font 1.000 is package 1.0.x,
+and the last number counts releases of the same font.
+
+```bash
+make build verify qa
+make package
+pnpm publish build/package
+```
+
+## License
+
+[SIL Open Font License 1.1](LICENSE.txt). “Wave Sans” is a Reserved Font
+Name: a modified version must be published under another name.
+[FONTLOG.txt](FONTLOG.txt) records every change.
