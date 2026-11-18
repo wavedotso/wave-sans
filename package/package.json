@@ -4,6 +4,12 @@
   "description": "The typeface of Wave: a variable sans serif for screens, precise at small sizes, refined at large ones, and unambiguous in every name.",
   "license": "OFL-1.1",
   "author": "Wave (https://wave.so)",
+  "homepage": "https://github.com/wavedotso/wave-sans#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wavedotso/wave-sans.git"
+  },
+  "bugs": "https://github.com/wavedotso/wave-sans/issues",
   "keywords": [
     "font",
     "typeface",

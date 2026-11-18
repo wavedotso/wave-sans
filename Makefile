@@ -6,10 +6,13 @@
 #                 the web fonts with the build
 #   make qa       FontBakery's checks, and how alike confusable pairs look
 #                 next to Inter
+#   make upstream download Inter's v4.1 release, which verify and qa compare
+#                 against, and check its checksum (verify and qa do it too)
 #   make specimen the specimen page and the web fonts in build/specimen,
 #                 served at http://localhost:8000 (PORT=... to change it)
 #   make package  the npm package @waveso/sans in build/package, published
-#                 with: pnpm publish build/package
+#                 with: pnpm publish build/package; and the release download
+#                 build/wave-sans-<version>.zip with build/release-notes.md
 #   make assets   the README images in assets/, drawn from the font
 #   make clean    remove build/
 
@@ -18,14 +21,19 @@ WEB := build/fonts/web
 SPECIMEN := build/specimen
 PACKAGE := build/package
 PORT ?= 8000
-INTER_RELEASE ?= upstream/inter-release/extracted/InterVariable.ttf
+PYTHON ?= python3
+INTER_DIR := upstream/inter-release
+INTER_ZIP := $(INTER_DIR)/Inter-4.1.zip
+INTER_ZIP_URL := https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
+INTER_ZIP_SHA256 := 9883fdd4a49d4fb66bd8177ba6625ef9a64aa45899767dde3d36aa425756b11e
+INTER_RELEASE ?= $(INTER_DIR)/extracted/InterVariable.ttf
 
-.PHONY: venv build verify qa specimen package assets clean
+.PHONY: venv build verify qa upstream specimen package assets clean
 
 venv: .venv/.ok
 
 .venv/.ok: requirements.txt
-	python3 -m venv .venv
+	$(PYTHON) -m venv .venv
 	.venv/bin/pip install -q --upgrade pip
 	.venv/bin/pip install -q -r requirements.txt
 	touch $@
@@ -33,13 +41,23 @@ venv: .venv/.ok
 build: venv
 	bash tools/build.sh "$(FONT)" "$(WEB)"
 
-verify: venv
+verify: venv $(INTER_RELEASE)
 	.venv/bin/python tools/verify.py "$(FONT)" "$(INTER_RELEASE)"
 	.venv/bin/python tools/verify_web.py "$(FONT)" "$(WEB)" --specimen specimen/index.html
 
-qa: venv
+qa: venv $(INTER_RELEASE)
 	.venv/bin/python tools/qa.py "$(FONT)"
 	.venv/bin/python tools/legibility.py "$(FONT)" "$(INTER_RELEASE)"
+
+upstream: $(INTER_RELEASE)
+
+$(INTER_DIR)/extracted/InterVariable.ttf:
+	mkdir -p "$(INTER_DIR)"
+	curl -fsSL -o "$(INTER_ZIP)" "$(INTER_ZIP_URL)"
+	echo "$(INTER_ZIP_SHA256)  $(INTER_ZIP)" | shasum -a 256 -c -
+	rm -rf "$(INTER_DIR)/extracted"
+	unzip -q "$(INTER_ZIP)" -d "$(INTER_DIR)/extracted"
+	touch "$@"
 
 # Browsers do not load fonts from a page opened as a file, so the specimen is
 # served. build/specimen is the whole site: any web server can host the folder.

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Build & Check
+    # make verify compares the build with the upstream release outline by
+    # outline, so it runs where that comparison was proven: macOS on Apple
+    # silicon, with the system Python 3.9 and the pinned toolchain.
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore the Python environment
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('requirements.txt') }}
+
+      - name: Python environment
+        # A restored environment is older than the checkout: mark it current,
+        # or make would reinstall it.
+        run: |
+          if [ -f .venv/.ok ]; then touch .venv/.ok; fi
+          make venv PYTHON=/usr/bin/python3
+
+      - name: Restore the upstream release
+        uses: actions/cache@v4
+        with:
+          path: upstream/inter-release
+          key: upstream-inter-4.1-9883fdd4
+
+      - name: Build
+        run: make build
+
+      - name: Verify
+        run: make verify
+
+      - name: QA
+        run: make qa
+
+      - name: Package
+        run: make package
+
+      - name: Keep the fonts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fonts
+          path: build/fonts
+          retention-days: 14

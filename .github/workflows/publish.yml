@@ -1,0 +1,122 @@
+name: Publish
+
+# A release is a commit that changes the version in package/package.json (with
+# the font version and FONTLOG.txt). Run it by hand from the Actions tab to
+# retry, or to release a version published by hand.
+on:
+  push:
+    branches: [main]
+    paths: [package/package.json]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    # The same machine as CI (see ci.yml): nothing is published unless the
+    # build passes make verify and make qa there.
+    runs-on: macos-15
+
+    permissions:
+      contents: write # tag and release on GitHub
+      id-token: write # OIDC for npm trusted publishing
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore the Python environment
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('requirements.txt') }}
+
+      - name: Python environment
+        run: |
+          if [ -f .venv/.ok ]; then touch .venv/.ok; fi
+          make venv PYTHON=/usr/bin/python3
+
+      - name: Restore the upstream release
+        uses: actions/cache@v4
+        with:
+          path: upstream/inter-release
+          key: upstream-inter-4.1-9883fdd4
+
+      - name: Build
+        run: make build
+
+      - name: Verify
+        run: make verify
+
+      - name: QA
+        run: make qa
+
+      - name: Package
+        run: make package
+
+      - name: Check npm
+        id: npm
+        # The first version is published by hand: npm sets up trusted
+        # publishing only for a package that exists. Until then, this run
+        # stops here without failing.
+        run: |
+          version=$(.venv/bin/python -c 'import json; print(json.load(open("package/package.json"))["version"])')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          registry=https://registry.npmjs.org/@waveso%2Fsans
+          if ! curl -fsS -o /dev/null "$registry"; then
+            echo "::notice::@waveso/sans is not on npm yet: publish its first version by hand (see the README)."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          elif curl -fsS -o /dev/null "$registry/$version"; then
+            echo "@waveso/sans $version is already on npm."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup pnpm
+        if: steps.npm.outputs.publish == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - name: Setup Node.js
+        if: steps.npm.outputs.publish == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          # Still needed with OIDC: it writes the .npmrc that tells the
+          # publisher which registry to authenticate against.
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to npm
+        if: steps.npm.outputs.publish == 'true'
+        # No NODE_AUTH_TOKEN, deliberately: pnpm publishes through npm trusted
+        # publishing (OIDC), set up on npmjs.com for @waveso/sans with
+        # organization wavedotso, repository wave-sans and workflow
+        # publish.yml. Provenance needs a public repository, so it turns on
+        # by itself when this one is public.
+        run: pnpm publish build/package --no-git-checks
+        env:
+          PNPM_CONFIG_PROVENANCE: ${{ !github.event.repository.private }}
+
+      - name: Release on GitHub
+        if: steps.npm.outputs.release == 'true'
+        # Every version on npm gets a release with the fonts and its FONTLOG
+        # entries, once.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ steps.npm.outputs.version }}
+        run: |
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "v$VERSION is already released."
+          else
+            gh release create "v$VERSION" "build/wave-sans-$VERSION.zip" \
+              --title "Wave Sans $VERSION" --notes-file build/release-notes.md --target "$GITHUB_SHA"
+          fi

@@ -167,6 +167,7 @@ make venv       # Python environment from requirements.txt
 make build      # the variable font and the web fonts
 make verify     # compare the build with the upstream release, glyph by glyph
 make qa         # FontBakery's checks and the confusable-pairs benchmark
+make upstream   # the upstream release that verify and qa compare against
 make specimen   # the specimen, at http://localhost:8000
 make package    # the npm package, in build/package
 make assets     # the README images, drawn from the font
@@ -176,9 +177,9 @@ The history starts from the upstream sources, untouched, and every later
 commit is one reviewed change. `make verify` compares every outline,
 advance and kerning pair with the upstream release and fails on any
 difference it cannot explain: each intended change is listed in
-`tools/verify.py` with its reason. It needs Inter's v4.1 release unpacked in
-`upstream/inter-release/extracted/` (`Inter-4.1.zip`, from
-https://github.com/rsms/inter/releases/tag/v4.1).
+`tools/verify.py` with its reason. The first run downloads the release it
+compares against, Inter v4.1, into `upstream/inter-release/` and checks its
+checksum.
 
 `make qa` runs FontBakery's universal checks and fails on any change from
 the problems recorded in `tools/qa-known.json`, where `tools/qa.py` gives
@@ -188,9 +189,13 @@ to 16 px on 1x and 2x screens: I l 1, O 0 o, rn m, cl d and vv w.
 `tools/proof.py` sets the same lines side by side in several font setups,
 for review images.
 
+CI builds, verifies and checks every push and pull request, and keeps each
+run's fonts for download.
+
 ### Project structure
 
 ```
+.github/       CI, and publishing to npm
 assets/        README images, drawn from the font
 misc/tools/    upstream build scripts the build uses
 package/       npm package manifest and readme
@@ -202,14 +207,26 @@ upstream/      upstream checkout and release, for verification (not in git)
 
 ## Releasing
 
-The package version follows the font version: font 1.000 is package 1.0.x,
-and the last number counts releases of the same font.
+Releases are published from GitHub. The font's version is in `version.txt`:
+0.1 for the previews, until the first stable release, 1.0. To release,
+change it and the version in `package/package.json` together (version 0.1
+is package 0.1.x, where the last number counts releases of the same font),
+and date the version's entries in FONTLOG.txt.
 
-```bash
-make build verify qa
-make package
-pnpm publish build/package
-```
+When that change reaches main, the Publish workflow builds, verifies and
+checks the fonts, publishes `@waveso/sans` to npm, and creates the GitHub
+release with the fonts and the version's FONTLOG entries. A version already
+on npm is not published again.
+
+Publishing uses npm's trusted publishing, so no token is stored. It takes
+three steps, once:
+
+1. Publish the first version by hand: `make build verify qa package`, then
+   `pnpm publish build/package`.
+2. On npmjs.com, give `@waveso/sans` a trusted publisher: owner
+   `wavedotso`, repository `wave-sans`, workflow `publish.yml`.
+3. Run the Publish workflow from the Actions tab, which creates the first
+   version's GitHub release.
 
 ## License
 
