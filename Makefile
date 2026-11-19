@@ -10,9 +10,9 @@
 #                 against, and check its checksum (verify and qa do it too)
 #   make specimen the specimen page and the web fonts in build/specimen,
 #                 served at http://localhost:8000 (PORT=... to change it)
-#   make package  the npm package @waveso/sans in build/package, published
-#                 with: pnpm publish build/package; and the release download
-#                 build/wave-sans-<version>.zip with build/release-notes.md
+#   make package  the npm package @waveso/sans in build/package, and the
+#                 release download build/wave-sans-<version>.zip with
+#                 build/release-notes.md
 #   make assets   the README images in assets/, drawn from the font
 #   make clean    remove build/
 

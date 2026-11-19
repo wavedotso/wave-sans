@@ -214,21 +214,10 @@ is package 0.1.x, where the last number counts releases of the same font),
 and date the version's entries in FONTLOG.txt.
 
 When that change reaches main, the Publish workflow builds, verifies and
-checks the fonts, publishes `@waveso/sans` to npm, and creates the GitHub
-release with the fonts and the version's FONTLOG entries. A version already
-on npm is not published again.
-
-Publishing uses npm's trusted publishing, so no token is stored. Setting it
-up:
-
-1. Publish the first version by hand: `make build verify qa package`, then
-   `pnpm publish build/package`. The Publish workflow then creates its
-   GitHub release when the commit is pushed, or when run from the Actions
-   tab.
-2. When the next version is ready to merge, give `@waveso/sans` a trusted
-   publisher on npmjs.com: owner `wavedotso`, repository `wave-sans`,
-   workflow `publish.yml`, allowed to publish with `npm publish`. npm drops
-   a new trusted publisher that does not publish within 2 days.
+checks the fonts, publishes `@waveso/sans` to npm through trusted
+publishing, with no stored token, and creates the GitHub release with the
+fonts and the version's FONTLOG entries. A version already on npm is not
+published again.
 
 ## License
 

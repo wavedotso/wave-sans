@@ -1,8 +1,7 @@
 name: Publish
 
-# A release is a commit that changes the version in package/package.json (with
-# the font version and FONTLOG.txt). Run it by hand from the Actions tab to
-# retry, or to release a version published by hand.
+# A release is a commit that changes the version in package/package.json, with
+# version.txt and FONTLOG.txt.
 on:
   push:
     branches: [main]
@@ -59,24 +58,16 @@ jobs:
 
       - name: Check npm
         id: npm
-        # The first version is published by hand: npm sets up trusted
-        # publishing only for a package that exists. Until then, this run
-        # stops here without failing.
+        # A version already on npm is not published again; its GitHub release
+        # is still made if it is missing.
         run: |
           version=$(.venv/bin/python -c 'import json; print(json.load(open("package/package.json"))["version"])')
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          registry=https://registry.npmjs.org/@waveso%2Fsans
-          if ! curl -fsS -o /dev/null "$registry"; then
-            echo "::notice::@waveso/sans is not on npm yet: publish its first version by hand (see the README)."
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "release=false" >> "$GITHUB_OUTPUT"
-          elif curl -fsS -o /dev/null "$registry/$version"; then
+          if curl -fsS -o /dev/null "https://registry.npmjs.org/@waveso%2Fsans/$version"; then
             echo "@waveso/sans $version is already on npm."
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "release=true" >> "$GITHUB_OUTPUT"
           else
             echo "publish=true" >> "$GITHUB_OUTPUT"
-            echo "release=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Setup pnpm
@@ -97,16 +88,13 @@ jobs:
       - name: Publish to npm
         if: steps.npm.outputs.publish == 'true'
         # No NODE_AUTH_TOKEN, deliberately: pnpm publishes through npm trusted
-        # publishing (OIDC), set up on npmjs.com for @waveso/sans with
-        # organization wavedotso, repository wave-sans and workflow
-        # publish.yml. Provenance needs a public repository, so it turns on
-        # by itself when this one is public.
+        # publishing (OIDC). Provenance needs a public repository, so it turns
+        # on by itself when this one is public.
         run: pnpm publish build/package --no-git-checks
         env:
           PNPM_CONFIG_PROVENANCE: ${{ !github.event.repository.private }}
 
       - name: Release on GitHub
-        if: steps.npm.outputs.release == 'true'
         # Every version on npm gets a release with the fonts and its FONTLOG
         # entries, once.
         env:
